@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pregunta.titulo} + ' | Learnia'">Pregunta | Learnia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        deepBlue: '#2C3E50',
+                        terracota: '#D35400',
+                        natureGreen: '#27AE60',
+                        eduCian: '#2980B9',
+                        solarYellow: '#F1C40F'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #fcfdfd;
+            background-image: radial-gradient(#2980B910 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .voto-btn {
+            transition: all 0.15s ease;
+        }
+        .voto-btn:active {
+            transform: scale(0.93);
+        }
+    </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white/80 backdrop-blur-md px-8 py-4 flex justify-between items-center sticky top-0 z-50 border-b border-slate-100 shadow-sm">
+    <div class="flex items-center space-x-4">
+        <a th:href="@{/menu}" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+            <i class="fa-solid fa-arrow-left text-deepBlue"></i>
+        </a>
+        <div class="text-2xl font-black tracking-tighter text-deepBlue">
+            LEAR<span class="text-eduCian">NIA</span>
+        </div>
+    </div>
+    <div class="flex items-center space-x-4">
+        <a th:href="@{/usuario}">
+            <img th:src="${usuario.fotoUsuario != null and !#strings.isEmpty(usuario.fotoUsuario) ? usuario.fotoUsuario : '/img/default-avatar.png'}"
+                 class="w-9 h-9 rounded-xl object-cover border-2 border-slate-100"
+                 alt="Foto de perfil">
+        </a>
+        <span class="text-sm font-bold text-deepBlue hidden md:block" th:text="${usuario.nombreUsuario}">Usuario</span>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="text-slate-400 hover:text-terracota transition-colors" title="Cerrar sesión">
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+            </button>
+        </form>
+    </div>
+</nav>
+
+<main class="max-w-4xl mx-auto p-6 space-y-6">
+
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="bg-deepBlue px-8 py-6">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="text-[10px] font-black text-solarYellow bg-solarYellow/20 px-3 py-1 rounded-full uppercase tracking-widest">
+                    <i class="fa-solid fa-circle-question mr-1"></i>Pregunta
+                </span>
+                <span class="text-[10px] text-slate-400 font-bold"
+                      th:text="${#temporals.format(pregunta.fechaPublicacion, 'dd/MM/yyyy HH:mm')}">
+                    01/01/2024
+                </span>
+            </div>
+            <h1 class="text-2xl font-black text-white leading-tight" th:text="${pregunta.titulo}">
+                Título de la pregunta
+            </h1>
+        </div>
+        <div class="px-8 py-6">
+            <p class="text-slate-600 font-medium leading-relaxed text-base" th:text="${pregunta.descripcion}">
+                Descripción de la pregunta...
+            </p>
+            <div class="mt-4 flex items-center gap-2 text-xs text-slate-400 font-bold">
+                <i class="fa-solid fa-user-circle text-eduCian"></i>
+                <span th:text="${pregunta.usuario.nombreUsuario}">Autor</span>
+                <span class="mx-2">·</span>
+                <i class="fa-solid fa-tag text-terracota"></i>
+                <span th:text="${pregunta.categoria.nombreCategoria}">Categoría</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+        <h2 class="text-sm font-black text-eduCian uppercase tracking-widest mb-5">
+            <i class="fa-solid fa-pen-to-square mr-2"></i>Tu Respuesta
+        </h2>
+        <form th:action="@{/respuestas}" method="post">
+            <input type="hidden" name="preguntaId" th:value="${pregunta.idPregunta}">
+            <textarea
+                    name="contenido"
+                    rows="5"
+                    required
+                    class="w-full p-4 rounded-2xl border border-slate-200 outline-none focus:border-eduCian resize-none text-slate-700 font-medium text-sm transition"
+                    placeholder="Escribe tu respuesta aquí..."></textarea>
+            <div class="flex justify-end mt-4">
+                <button type="submit"
+                        class="inline-flex items-center gap-2 bg-natureGreen text-white px-8 py-3 rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-natureGreen/30 uppercase tracking-widest">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Publicar Respuesta
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="space-y-4">
+        <div class="flex items-center gap-3 px-2">
+            <h3 class="font-black text-deepBlue text-lg">Respuestas</h3>
+            <span class="bg-eduCian text-white text-xs font-black px-3 py-1 rounded-full"
+                  th:text="${#lists.size(respuestas)}">0</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(respuestas)}"
+             class="bg-white p-12 rounded-3xl border border-slate-100 text-center">
+            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-slate-200">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+            <h4 class="font-black text-deepBlue mb-1">Nadie ha respondido aún</h4>
+            <p class="text-slate-400 text-sm">¡Sé el primero en ayudar!</p>
+        </div>
+
+        <div th:each="r : ${respuestas}"
+             class="bg-white p-6 rounded-3xl border border-slate-100 hover:shadow-md transition-all">
+
+            <div class="flex items-center gap-3 mb-4">
+                <img th:src="${r.usuario.fotoUsuario != null and !#strings.isEmpty(r.usuario.fotoUsuario) ? r.usuario.fotoUsuario : '/img/default-avatar.png'}"
+                     class="w-9 h-9 rounded-xl object-cover border border-slate-100"
+                     alt="Avatar">
+                <div>
+                    <p class="text-sm font-bold text-deepBlue" th:text="${r.usuario.nombreUsuario}">Usuario</p>
+                    <p class="text-[10px] text-slate-400 font-bold"
+                       th:text="${#temporals.format(r.fechaRespuesta, 'dd/MM/yyyy HH:mm')}">Fecha</p>
+                </div>
+                <div class="ml-auto">
+                    <span class="text-[10px] font-black text-natureGreen bg-natureGreen/10 px-3 py-1 rounded-full uppercase">
+                        <i class="fa-solid fa-check mr-1"></i>Respuesta
+                    </span>
+                </div>
+            </div>
+
+            <p class="text-slate-600 font-medium leading-relaxed text-sm mb-4" th:text="${r.contenido}">
+                Contenido de la respuesta...
+            </p>
+
+            <div class="flex items-center gap-2 pt-4 border-t border-slate-100">
+
+                <button
+                        th:id="'btn-like-' + ${r.idRespuesta}"
+                        th:classappend="${votoUsuarioMap[r.idRespuesta] == 'LIKE'} ? 'bg-natureGreen text-white shadow-md shadow-natureGreen/30' : 'bg-slate-50 text-slate-400 hover:bg-natureGreen/10 hover:text-natureGreen'"
+                        class="voto-btn flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs border border-transparent"
+                        th:onclick="|votar(${r.idRespuesta}, 'LIKE', ${usuario.idUsuario})|"
+                        th:title="${votoUsuarioMap[r.idRespuesta] == 'LIKE'} ? 'Ya votaste like' : 'Me gusta'">
+                    <i class="fa-solid fa-thumbs-up"></i>
+                    <span th:id="'likes-' + ${r.idRespuesta}"
+                          th:text="${votosMap[r.idRespuesta][0]}">0</span>
+                </button>
+
+                <button
+                        th:id="'btn-dislike-' + ${r.idRespuesta}"
+                        th:classappend="${votoUsuarioMap[r.idRespuesta] == 'DISLIKE'} ? 'bg-terracota text-white shadow-md shadow-terracota/30' : 'bg-slate-50 text-slate-400 hover:bg-terracota/10 hover:text-terracota'"
+                        class="voto-btn flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs border border-transparent"
+                        th:onclick="|votar(${r.idRespuesta}, 'DISLIKE', ${usuario.idUsuario})|"
+                        th:title="${votoUsuarioMap[r.idRespuesta] == 'DISLIKE'} ? 'Ya votaste dislike' : 'No me gusta'">
+                    <i class="fa-solid fa-thumbs-down"></i>
+                    <span th:id="'dislikes-' + ${r.idRespuesta}"
+                          th:text="${votosMap[r.idRespuesta][1]}">0</span>
+                </button>
+
+                <span th:if="${votoUsuarioMap[r.idRespuesta] != null}"
+                      class="ml-2 text-[10px] text-slate-400 font-bold italic">
+                    Ya votaste en esta respuesta
+                </span>
+
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    async function votar(idRespuesta, tipoVoto, idUsuario) {
+        const btnLike    = document.getElementById('btn-like-'    + idRespuesta);
+        const btnDislike = document.getElementById('btn-dislike-' + idRespuesta);
+        if (btnLike)    btnLike.disabled    = true;
+        if (btnDislike) btnDislike.disabled = true;
+
+        try {
+            const res = await fetch('/api/votos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idRespuesta: idRespuesta,
+                    tipoVoto:    tipoVoto,
+                    idUsuario:   idUsuario
+                })
+            });
+
+            if (res.status === 201 || res.ok) {
+                location.reload();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                const msg  = data.message || ('Error ' + res.status);
+                mostrarToast(msg, 'error');
+                // Re-habilitar botones si hubo error
+                if (btnLike)    btnLike.disabled    = false;
+                if (btnDislike) btnDislike.disabled = false;
+            }
+        } catch (e) {
+            mostrarToast('No se pudo conectar con el servidor.', 'error');
+            if (btnLike)    btnLike.disabled    = false;
+            if (btnDislike) btnDislike.disabled = false;
+        }
+    }
+
+    function mostrarToast(mensaje, tipo) {
+        const toast = document.createElement('div');
+        const color = tipo === 'error' ? 'bg-terracota' : 'bg-natureGreen';
+        toast.className = `fixed bottom-6 right-6 z-50 ${color} text-white text-sm font-bold px-5 py-3 rounded-2xl shadow-lg transition-all`;
+        toast.textContent = mensaje;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    }
+</script>
+
+    <div th:replace="~{fragments/chatbot :: chatbot}"></div>
+</body>
+</html>

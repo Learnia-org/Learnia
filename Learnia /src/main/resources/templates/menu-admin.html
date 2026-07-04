@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Learnia | Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { deepBlue:'#2C3E50', terracota:'#D35400', natureGreen:'#27AE60', eduCian:'#2980B9' } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-deepBlue antialiased">
+<div class="flex">
+    <aside class="w-72 h-screen bg-deepBlue text-white p-8 sticky top-0 flex flex-col">
+        <div class="text-2xl font-black mb-12 tracking-tighter">
+            LEAR<span class="text-eduCian">NIA</span>
+            <span class="text-[10px] bg-terracota px-2 py-1 rounded ml-2 uppercase">Admin</span>
+        </div>
+        <nav class="space-y-4 flex-1">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gestión Principal</p>
+            <a href="/menu-admin" class="flex items-center space-x-4 p-3 bg-white/10 rounded-xl font-bold text-sm">
+                <i class="fa-solid fa-chart-line text-eduCian"></i><span>Dashboard</span>
+            </a>
+            <a href="/admin/usuarios" class="flex items-center space-x-4 p-3 hover:bg-white/5 rounded-xl font-bold text-sm text-slate-300 transition-all">
+                <i class="fa-solid fa-users"></i><span>Usuarios</span>
+            </a>
+            <a href="/admin/categorias" class="flex items-center space-x-4 p-3 hover:bg-white/5 rounded-xl font-bold text-sm text-slate-300 transition-all">
+                <i class="fa-solid fa-tags"></i><span>Categorías</span>
+            </a>
+        </nav>
+        <div class="pt-6 border-t border-white/10">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="flex items-center space-x-4 p-3 text-terracota font-bold text-sm w-full">
+                    <i class="fa-solid fa-power-off"></i><span>Cerrar Sesión</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-10">
+        <header class="flex justify-between items-center mb-10">
+            <h1 class="text-2xl font-black italic text-deepBlue">Panel de Control</h1>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <p class="text-sm font-bold" th:text="${usuario.nombreUsuario}">Administrador</p>
+                    <p class="text-[10px] text-natureGreen font-black uppercase tracking-widest animate-pulse">Sistema en Tiempo Real</p>
+                </div>
+                <div class="w-12 h-12 bg-eduCian rounded-2xl flex items-center justify-center text-white font-bold shadow-lg shadow-eduCian/30">A</div>
+            </div>
+        </header>
+
+        <!-- Stats en tiempo real -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Usuarios</p>
+                <p class="text-4xl font-black" id="stat-total" th:text="${totalUsuarios}">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">En Línea</p>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-natureGreen rounded-full animate-ping"></div>
+                    <p class="text-4xl font-black text-natureGreen" id="stat-online" th:text="${enLinea}">0</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Preguntas Hoy</p>
+                <p class="text-4xl font-black text-terracota" id="stat-preguntas" th:text="${preguntasHoy}">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Categorías Activas</p>
+                <p class="text-4xl font-black text-eduCian" id="stat-categorias" th:text="${categoriasActivas}">0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <!-- Categorías -->
+            <div class="lg:col-span-1 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-black text-lg italic">Categorías</h3>
+                    <a href="/admin/categorias" class="w-8 h-8 bg-eduCian text-white rounded-lg flex items-center justify-center hover:bg-deepBlue transition-colors" title="Gestionar categorías">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </a>
+                </div>
+                <div class="space-y-3">
+                    <div th:each="cat : ${categorias}" class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl group hover:bg-eduCian/5 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full" th:class="${cat.activa} ? 'w-2 h-2 bg-natureGreen rounded-full' : 'w-2 h-2 bg-slate-300 rounded-full'"></span>
+                            <span class="font-bold text-sm" th:text="${cat.nombreCategoria}">Categoría</span>
+                        </div>
+                        <a href="/admin/categorias" class="text-slate-300 hover:text-eduCian opacity-0 group-hover:opacity-100 transition-opacity text-xs">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div th:if="${#lists.isEmpty(categorias)}" class="p-4 text-center text-slate-400 text-sm">
+                        Sin categorías. <a href="/admin/categorias" class="text-eduCian font-bold">Crear una</a>
+                    </div>
+                </div>
+                <a href="/admin/categorias" class="block mt-6 text-center text-eduCian font-black text-[10px] uppercase tracking-widest hover:underline">
+                    Ver todas las categorías →
+                </a>
+            </div>
+
+            <!-- Usuarios Recientes -->
+            <div class="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-8 border-b border-slate-50 flex justify-between items-center">
+                    <h3 class="font-black text-lg italic">Usuarios Recientes</h3>
+                    <a href="/admin/usuarios" class="text-eduCian font-black text-[10px] uppercase tracking-widest hover:underline">Ver todos →</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                        <tr>
+                            <th class="px-8 py-5">Usuario</th>
+                            <th class="px-8 py-5">Estado</th>
+                            <th class="px-8 py-5">Rol</th>
+                            <th class="px-8 py-5 text-right">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-sm" th:if="${not #lists.isEmpty(usuariosRecientes)}">
+                        <tr th:each="u : ${usuariosRecientes}" class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                            <td class="px-8 py-5">
+                                <div class="font-bold text-deepBlue" th:text="${u.nombreUsuario}">Usuario</div>
+                                <div class="text-[10px] text-slate-400" th:text="${u.correoUsuario}">correo</div>
+                            </td>
+                            <td class="px-8 py-5">
+                                <span th:if="${u.bloqueado}" class="flex items-center text-terracota text-[10px] font-black uppercase gap-1.5">
+                                    <i class="fa-solid fa-lock text-xs"></i> Bloqueado
+                                </span>
+                                <span th:if="${!u.bloqueado and u.enLinea}" class="flex items-center text-natureGreen text-[10px] font-black uppercase gap-1.5">
+                                    <span class="w-1.5 h-1.5 bg-natureGreen rounded-full animate-ping"></span> En línea
+                                </span>
+                                <span th:if="${!u.bloqueado and !u.enLinea}" class="flex items-center text-slate-400 text-[10px] font-black uppercase gap-1.5">
+                                    <span class="w-1.5 h-1.5 bg-slate-300 rounded-full"></span> Offline
+                                </span>
+                            </td>
+                            <td class="px-8 py-5">
+                                <span th:if="${u.rolUsuario.name() == 'ADMIN'}" class="bg-terracota/10 text-terracota px-3 py-1 rounded-full text-[10px] font-black uppercase">Admin</span>
+                                <span th:if="${u.rolUsuario.name() == 'ESTUDIANTE'}" class="bg-eduCian/10 text-eduCian px-3 py-1 rounded-full text-[10px] font-black uppercase">Estudiante</span>
+                                <span th:if="${u.rolUsuario.name() == 'MODERADOR'}" class="bg-natureGreen/10 text-natureGreen px-3 py-1 rounded-full text-[10px] font-black uppercase">Moderador</span>
+                            </td>
+                            <td class="px-8 py-5 text-right">
+                                <a href="/admin/usuarios" class="text-slate-300 hover:text-eduCian transition-colors">
+                                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                        <tbody th:if="${#lists.isEmpty(usuariosRecientes)}">
+                        <tr><td colspan="4" class="px-8 py-10 text-center text-slate-400">No hay actividad reciente.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Stats en tiempo real cada 5 segundos
+    function actualizarStats() {
+        fetch('/api/admin/stats')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('stat-total').textContent = data.totalUsuarios;
+                document.getElementById('stat-online').textContent = data.enLinea;
+                document.getElementById('stat-preguntas').textContent = data.preguntasHoy;
+                document.getElementById('stat-categorias').textContent = data.categoriasActivas;
+            })
+            .catch(() => {});
+    }
+    setInterval(actualizarStats, 5000);
+</script>
+    <div th:replace="~{fragments/chatbot :: chatbot}"></div>
+</body>
+</html>

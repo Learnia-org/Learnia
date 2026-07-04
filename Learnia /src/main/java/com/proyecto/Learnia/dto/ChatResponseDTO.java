@@ -1,0 +1,12 @@
+package com.proyecto.Learnia.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class ChatResponseDTO {
+    private String respuesta;
+}

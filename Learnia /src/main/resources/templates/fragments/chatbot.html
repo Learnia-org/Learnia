@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="chatbot">
+
+    <style>
+        #lia-chat-root, #lia-chat-root * { box-sizing: border-box; }
+        #lia-chat-root {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 999999;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        #lia-chat-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #2980B9, #2C3E50);
+            box-shadow: 0 6px 18px rgba(44, 62, 80, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        #lia-chat-toggle:hover { transform: scale(1.08); box-shadow: 0 8px 22px rgba(44, 62, 80, 0.5); }
+        #lia-chat-toggle svg { width: 28px; height: 28px; fill: #ffffff; }
+        #lia-chat-toggle .lia-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #D35400;
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 999px;
+            border: 2px solid #fff;
+        }
+
+        #lia-chat-panel {
+            position: fixed;
+            right: 20px;
+            bottom: 92px;
+            width: 360px;
+            max-width: calc(100vw - 32px);
+            height: 500px;
+            max-height: calc(100vh - 120px);
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+        #lia-chat-panel.lia-open { display: flex; animation: liaFadeUp 0.2s ease; }
+        @keyframes liaFadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #lia-chat-header {
+            background: linear-gradient(135deg, #2C3E50, #2980B9);
+            color: #fff;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        #lia-chat-header .lia-title { display: flex; align-items: center; gap: 10px; }
+        #lia-chat-header .lia-title-text { display: flex; flex-direction: column; line-height: 1.15; }
+        #lia-chat-header .lia-title-text strong { font-size: 14.5px; }
+        #lia-chat-header .lia-title-text span { font-size: 11.5px; opacity: 0.85; }
+        #lia-chat-header .lia-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+        }
+        #lia-chat-header .lia-avatar svg { width: 18px; height: 18px; fill: #fff; }
+        #lia-chat-header .lia-actions { display: flex; gap: 6px; }
+        #lia-chat-header button.lia-icon-btn {
+            background: transparent; border: none; color: #fff; opacity: 0.85;
+            cursor: pointer; padding: 4px; border-radius: 6px; display: flex;
+        }
+        #lia-chat-header button.lia-icon-btn:hover { opacity: 1; background: rgba(255,255,255,0.15); }
+        #lia-chat-header button.lia-icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+        #lia-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            background: #F8FAFC;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .lia-msg { max-width: 82%; padding: 9px 12px; border-radius: 14px; font-size: 13.5px; line-height: 1.45; white-space: pre-wrap; word-wrap: break-word; }
+        .lia-msg-bot { align-self: flex-start; background: #ffffff; color: #2C3E50; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; }
+        .lia-msg-user { align-self: flex-end; background: #2980B9; color: #fff; border-bottom-right-radius: 4px; }
+        .lia-msg-error { background: #FEECEC; color: #B91C1C; border: 1px solid #FCA5A5; }
+
+        .lia-typing { align-self: flex-start; display: flex; gap: 4px; padding: 10px 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; border-bottom-left-radius: 4px; }
+        .lia-typing span { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; animation: liaBlink 1.2s infinite ease-in-out; }
+        .lia-typing span:nth-child(2) { animation-delay: 0.15s; }
+        .lia-typing span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes liaBlink { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
+
+        #lia-chat-inputbar {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid #e5e7eb;
+            background: #fff;
+            flex-shrink: 0;
+        }
+        #lia-chat-input {
+            flex: 1;
+            resize: none;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            padding: 9px 12px;
+            font-size: 13.5px;
+            font-family: inherit;
+            max-height: 90px;
+            outline: none;
+        }
+        #lia-chat-input:focus { border-color: #2980B9; }
+        #lia-chat-send {
+            width: 38px; height: 38px; border-radius: 50%; border: none;
+            background: #D35400; color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background 0.15s ease;
+        }
+        #lia-chat-send:hover { background: #b8460a; }
+        #lia-chat-send:disabled { background: #cbd5e1; cursor: not-allowed; }
+        #lia-chat-send svg { width: 16px; height: 16px; fill: #fff; }
+
+        @media (max-width: 480px) {
+            #lia-chat-panel { right: 12px; left: 12px; width: auto; bottom: 84px; }
+            #lia-chat-root { right: 12px; bottom: 12px; }
+        }
+    </style>
+
+    <div id="lia-chat-root">
+        <div id="lia-chat-panel">
+            <div id="lia-chat-header">
+                <div class="lia-title">
+                    <div class="lia-avatar">
+                        <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2v1h1a3 3 0 0 1 3 3v3.5A3.5 3.5 0 0 1 14.5 15h-5A3.5 3.5 0 0 1 6 11.5V8a3 3 0 0 1 3-3h1V4a2 2 0 0 1 2-2Zm-3 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM4 12h1v4a1 1 0 0 1-2 0v-3a1 1 0 0 1 1-1Zm16 0a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0v-4h1ZM9 19h6a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2Z"/></svg>
+                    </div>
+                    <div class="lia-title-text">
+                        <strong>Asistente Learnia</strong>
+                        <span>Pregúntame lo que necesites</span>
+                    </div>
+                </div>
+                <div class="lia-actions">
+                    <button type="button" class="lia-icon-btn" id="lia-chat-clear" title="Nueva conversación">
+                        <svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7L6 7Zm3-3h6l1 2H8l1-2Zm-1 5 .6 10h.9L9 9H8Zm4 0 .5 10h.9L13 9h-1Z"/></svg>
+                    </button>
+                    <button type="button" class="lia-icon-btn" id="lia-chat-close" title="Cerrar">
+                        <svg viewBox="0 0 24 24"><path d="M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6 6.4 5Z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="lia-chat-messages"></div>
+
+            <div id="lia-chat-inputbar">
+                <textarea id="lia-chat-input" rows="1" placeholder="Escribe tu pregunta..."></textarea>
+                <button type="button" id="lia-chat-send" title="Enviar">
+                    <svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2v7Z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <button type="button" id="lia-chat-toggle" title="Chatear con la IA de Learnia">
+            <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2v1h1a3 3 0 0 1 3 3v3.5A3.5 3.5 0 0 1 14.5 15h-5A3.5 3.5 0 0 1 6 11.5V8a3 3 0 0 1 3-3h1V4a2 2 0 0 1 2-2Zm-3 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM4 12h1v4a1 1 0 0 1-2 0v-3a1 1 0 0 1 1-1Zm16 0a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0v-4h1ZM9 19h6a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2Z"/></svg>
+        </button>
+    </div>
+
+    <script th:inline="none">
+    (function () {
+        var STORAGE_KEY = 'lia_chat_history_v1';
+        var OPEN_KEY = 'lia_chat_open_v1';
+
+        var panel = document.getElementById('lia-chat-panel');
+        var toggleBtn = document.getElementById('lia-chat-toggle');
+        var closeBtn = document.getElementById('lia-chat-close');
+        var clearBtn = document.getElementById('lia-chat-clear');
+        var messagesBox = document.getElementById('lia-chat-messages');
+        var input = document.getElementById('lia-chat-input');
+        var sendBtn = document.getElementById('lia-chat-send');
+
+        function getHistory() {
+            try {
+                return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || [];
+            } catch (e) { return []; }
+        }
+
+        function saveHistory(history) {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        }
+
+        function renderMessage(role, texto, isError) {
+            var div = document.createElement('div');
+            div.className = 'lia-msg ' + (role === 'user' ? 'lia-msg-user' : 'lia-msg-bot');
+            if (isError) div.className += ' lia-msg-error';
+            div.textContent = texto;
+            messagesBox.appendChild(div);
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        }
+
+        function renderAll() {
+            messagesBox.innerHTML = '';
+            var history = getHistory();
+            if (history.length === 0) {
+                renderMessage('model', '¡Hola! 👋 Soy el asistente de IA de Learnia. Puedo ayudarte a resolver dudas de tus materias o explicarte cualquier tema. ¿En qué te ayudo hoy?');
+                return;
+            }
+            history.forEach(function (turno) {
+                renderMessage(turno.role, turno.texto);
+            });
+        }
+
+        function showTyping() {
+            var typing = document.createElement('div');
+            typing.className = 'lia-typing';
+            typing.id = 'lia-chat-typing';
+            typing.innerHTML = '<span></span><span></span><span></span>';
+            messagesBox.appendChild(typing);
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        }
+
+        function hideTyping() {
+            var typing = document.getElementById('lia-chat-typing');
+            if (typing) typing.remove();
+        }
+
+        function openPanel() {
+            panel.classList.add('lia-open');
+            sessionStorage.setItem(OPEN_KEY, '1');
+            input.focus();
+        }
+
+        function closePanel() {
+            panel.classList.remove('lia-open');
+            sessionStorage.setItem(OPEN_KEY, '0');
+        }
+
+        toggleBtn.addEventListener('click', function () {
+            panel.classList.contains('lia-open') ? closePanel() : openPanel();
+        });
+        closeBtn.addEventListener('click', closePanel);
+
+        clearBtn.addEventListener('click', function () {
+            saveHistory([]);
+            renderAll();
+        });
+
+        input.addEventListener('input', function () {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 90) + 'px';
+        });
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                enviarMensaje();
+            }
+        });
+
+        sendBtn.addEventListener('click', enviarMensaje);
+
+        function enviarMensaje() {
+            var texto = input.value.trim();
+            if (!texto) return;
+
+            var history = getHistory();
+
+            renderMessage('user', texto);
+            history.push({ role: 'user', texto: texto });
+            saveHistory(history);
+
+            input.value = '';
+            input.style.height = 'auto';
+            sendBtn.disabled = true;
+            showTyping();
+
+            fetch('/api/chatbot/mensaje', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mensaje: texto,
+                    historial: history
+                })
+            })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Error de red');
+                    return res.json();
+                })
+                .then(function (data) {
+                    hideTyping();
+                    var respuesta = data.respuesta || 'No obtuve respuesta, intenta de nuevo.';
+                    renderMessage('model', respuesta);
+                    var h = getHistory();
+                    h.push({ role: 'model', texto: respuesta });
+                    saveHistory(h);
+                })
+                .catch(function () {
+                    hideTyping();
+                    renderMessage('model', 'Ocurrió un error al contactar al asistente. Intenta de nuevo en unos segundos.', true);
+                })
+                .finally(function () {
+                    sendBtn.disabled = false;
+                });
+        }
+
+        renderAll();
+        if (sessionStorage.getItem(OPEN_KEY) === '1') {
+            openPanel();
+        }
+    })();
+    </script>
+</div>
+
+</body>
+</html>

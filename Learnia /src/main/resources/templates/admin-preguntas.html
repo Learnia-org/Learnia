@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Learnia | Admin - Preguntas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+        theme: { extend: { colors: { deepBlue:'#2C3E50', terracota:'#D35400', natureGreen:'#27AE60', eduCian:'#2980B9' } } }
+    }
+  </script>
+  <style>
+    .pregunta-oculta { opacity: 0.45; }
+    .respuesta-row { background: #f8fafc; border-left: 3px solid #2980B9; }
+  </style>
+</head>
+<body class="bg-slate-50 text-deepBlue antialiased">
+<div class="flex">
+  <aside class="w-72 h-screen bg-deepBlue text-white p-8 sticky top-0 flex flex-col">
+    <div class="text-2xl font-black mb-12 tracking-tighter">
+      LEAR<span class="text-eduCian">NIA</span>
+      <span class="text-[10px] bg-terracota px-2 py-1 rounded ml-2 uppercase">Admin</span>
+    </div>
+    <nav class="space-y-4 flex-1">
+      <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gestión Principal</p>
+      <a href="/menu-admin" class="flex items-center space-x-4 p-3 hover:bg-white/5 rounded-xl font-bold text-sm text-slate-300 transition-all">
+        <i class="fa-solid fa-chart-line text-slate-400"></i><span>Dashboard</span>
+      </a>
+      <a href="/admin/usuarios" class="flex items-center space-x-4 p-3 hover:bg-white/5 rounded-xl font-bold text-sm text-slate-300 transition-all">
+        <i class="fa-solid fa-users text-slate-400"></i><span>Usuarios</span>
+      </a>
+      <a href="/admin/preguntas" class="flex items-center space-x-4 p-3 bg-white/10 rounded-xl font-bold text-sm">
+        <i class="fa-solid fa-circle-question text-eduCian"></i><span>Preguntas</span>
+      </a>
+      <a href="/admin/categorias" class="flex items-center space-x-4 p-3 hover:bg-white/5 rounded-xl font-bold text-sm text-slate-300 transition-all">
+        <i class="fa-solid fa-tags"></i><span>Categorías</span>
+      </a>
+    </nav>
+    <div class="pt-6 border-t border-white/10">
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="flex items-center space-x-4 p-3 text-terracota font-bold text-sm w-full">
+          <i class="fa-solid fa-power-off"></i><span>Cerrar Sesión</span>
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="flex-1 p-10">
+    <header class="flex justify-between items-center mb-10">
+      <div>
+        <h1 class="text-2xl font-black italic text-deepBlue">Preguntas y Respuestas</h1>
+        <p class="text-slate-400 text-sm">Modera el contenido de la comunidad</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="text-right">
+          <p class="text-sm font-bold" th:text="${usuario.nombreUsuario}">Administrador</p>
+          <p class="text-[10px] text-natureGreen font-black uppercase tracking-widest animate-pulse">Sistema en Tiempo Real</p>
+        </div>
+        <div class="w-12 h-12 bg-eduCian rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">A</div>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-3 gap-6 mb-10">
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Preguntas</p>
+        <p class="text-4xl font-black" th:text="${totalPreguntas}">0</p>
+      </div>
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Respuestas</p>
+        <p class="text-4xl font-black text-eduCian" th:text="${totalRespuestas}">0</p>
+      </div>
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Ocultas</p>
+        <p class="text-4xl font-black text-terracota" th:text="${totalOcultas}">0</p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3 mb-6 items-center">
+      <button onclick="filtrarPreguntas('todas')" id="f-todas"
+              class="px-5 py-2 bg-deepBlue text-white rounded-xl text-xs font-bold transition-all">Todas</button>
+      <button onclick="filtrarPreguntas('visibles')" id="f-visibles"
+              class="px-5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all">
+        <i class="fa-solid fa-eye mr-1 text-natureGreen"></i>Visibles
+      </button>
+      <button onclick="filtrarPreguntas('ocultas')" id="f-ocultas"
+              class="px-5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all">
+        <i class="fa-solid fa-eye-slash mr-1 text-terracota"></i>Ocultas
+      </button>
+
+      <select id="filtro-categoria" onchange="filtrarPorCategoria()"
+              class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-eduCian bg-white">
+        <option value="">Todas las categorías</option>
+        <option th:each="cat : ${categorias}" th:value="${cat.idCategoria}" th:text="${cat.nombreCategoria}">Categoría</option>
+      </select>
+
+      <div class="flex-1"></div>
+      <div class="relative">
+        <input type="text" id="buscar-pregunta" onkeyup="buscarPregunta()"
+               placeholder="Buscar por título, usuario o ID..."
+               class="pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-eduCian w-72">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div th:if="${preguntas == null or #lists.isEmpty(preguntas)}"
+           class="bg-white rounded-[2rem] border border-slate-100 p-16 text-center text-slate-400">
+        <i class="fa-solid fa-inbox text-4xl mb-4 block"></i>
+        No hay preguntas registradas aún.
+      </div>
+
+      <div th:each="p : ${preguntas}"
+           th:id="'pregunta-' + ${p.idPregunta}"
+           th:data-id="${p.idPregunta}"
+           th:data-categoria="${p.categoria != null ? p.categoria.idCategoria : ''}"
+           th:data-oculta="${p.oculta}"
+           th:classappend="${p.oculta} ? ' pregunta-oculta' : ''"
+           class="pregunta-block bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+
+        <div class="p-6 flex items-start justify-between gap-4">
+          <div class="flex items-start space-x-4 flex-1 min-w-0">
+                        <span class="text-xs font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-lg mt-1 shrink-0"
+                              th:text="'#' + ${p.idPregunta}">ID</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                                <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-eduCian/10 text-eduCian uppercase"
+                                      th:text="${p.categoria?.nombreCategoria ?: 'Sin categoría'}">Cat</span>
+                <span th:if="${p.oculta}" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-terracota/10 text-terracota uppercase">
+                                    <i class="fa-solid fa-eye-slash mr-1"></i>Oculta
+                                </span>
+                <span class="text-[10px] text-slate-400 font-bold"
+                      th:text="${#temporals.format(p.fechaPublicacion, 'dd/MM/yyyy HH:mm')}">fecha</span>
+              </div>
+              <h3 class="font-black text-deepBlue text-sm leading-snug mb-1" th:text="${p.titulo}">Título</h3>
+              <p class="text-xs text-slate-500 line-clamp-2" th:text="${p.descripcion}">Descripción</p>
+              <p class="text-[10px] text-slate-400 font-bold mt-2">
+                <i class="fa-solid fa-user mr-1"></i>
+                <span th:text="${p.usuario?.nombreUsuario ?: 'Anónimo'}">Usuario</span>
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 shrink-0">
+            <button onclick="toggleRespuestas(this)"
+                    th:data-id="${p.idPregunta}"
+                    class="px-3 py-1.5 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold hover:bg-eduCian hover:text-white transition-all">
+              <i class="fa-solid fa-comments mr-1"></i>
+              Ver respuestas
+            </button>
+            <form th:action="@{/admin/preguntas/{id}/ocultar(id=${p.idPregunta})}" method="post" class="inline">
+              <button type="submit"
+                      th:class="${p.oculta} ? 'px-3 py-1.5 bg-natureGreen/10 text-natureGreen rounded-xl text-xs font-bold hover:bg-natureGreen hover:text-white transition-all' : 'px-3 py-1.5 bg-terracota/10 text-terracota rounded-xl text-xs font-bold hover:bg-terracota hover:text-white transition-all'"
+                      th:title="${p.oculta} ? 'Mostrar' : 'Ocultar'">
+                <i th:class="${p.oculta} ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i>
+                <span th:text="${p.oculta} ? 'Mostrar' : 'Ocultar'">Ocultar</span>
+              </button>
+            </form>
+            <form th:action="@{/admin/preguntas/{id}/eliminar(id=${p.idPregunta})}" method="post" class="inline"
+                  onsubmit="return confirm('¿Eliminar esta pregunta y todas sus respuestas?')">
+              <button type="submit" class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition-all" title="Eliminar">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div th:id="'respuestas-' + ${p.idPregunta}" class="hidden border-t border-slate-100">
+          <div class="p-4 bg-slate-50 flex items-center justify-between">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <i class="fa-solid fa-reply mr-1 text-eduCian"></i>Respuestas de esta pregunta
+            </p>
+          </div>
+          <div th:if="${p.respuestas != null and not #lists.isEmpty(p.respuestas)}" class="divide-y divide-slate-100">
+            <div th:each="r : ${p.respuestas}"
+                 th:id="'respuesta-' + ${r.idRespuesta}"
+                 class="respuesta-row mx-4 my-3 p-4 rounded-2xl">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-[10px] font-black text-slate-400 bg-white px-2 py-0.5 rounded-lg border border-slate-200"
+                                              th:text="'#R' + ${r.idRespuesta}">ID</span>
+                    <span class="text-[10px] font-bold text-slate-500"
+                          th:text="${r.usuario?.nombreUsuario ?: 'Anónimo'}">Usuario</span>
+                    <span class="text-[10px] text-slate-400"
+                          th:text="${#temporals.format(r.fechaRespuesta, 'dd/MM/yyyy HH:mm')}">fecha</span>
+                  </div>
+                  <p class="text-xs text-slate-600 leading-relaxed" th:text="${r.contenido}">Contenido</p>
+                </div>
+                <form th:action="@{/admin/respuestas/{id}/eliminar(id=${r.idRespuesta})}" method="post" class="shrink-0"
+                      onsubmit="return confirm('¿Eliminar esta respuesta?')">
+                  <button type="submit" class="px-3 py-1.5 bg-white text-slate-400 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition-all border border-slate-200" title="Eliminar respuesta">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div th:if="${p.respuestas == null or #lists.isEmpty(p.respuestas)}"
+               class="px-6 py-5 text-center text-slate-400 text-xs">
+            Esta pregunta no tiene respuestas aún.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function toggleRespuestas(btn) {
+      const id = btn.getAttribute('data-id');
+      const panel = document.getElementById('respuestas-' + id);
+      const isHidden = panel.classList.contains('hidden');
+      panel.classList.toggle('hidden');
+      btn.innerHTML = isHidden
+          ? '<i class="fa-solid fa-chevron-up mr-1"></i>Ocultar respuestas'
+          : '<i class="fa-solid fa-comments mr-1"></i>Ver respuestas';
+  }
+
+  function filtrarPreguntas(tipo) {
+      ['todas','visibles','ocultas'].forEach(t => {
+          const btn = document.getElementById('f-' + t);
+          if (btn) btn.className = 'px-5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all';
+      });
+      const active = document.getElementById('f-' + tipo);
+      if (active) active.className = 'px-5 py-2 bg-deepBlue text-white rounded-xl text-xs font-bold transition-all';
+
+      document.querySelectorAll('.pregunta-block').forEach(block => {
+          const oculta = block.getAttribute('data-oculta') === 'true';
+          let visible = true;
+          if (tipo === 'visibles') visible = !oculta;
+          else if (tipo === 'ocultas') visible = oculta;
+          block.style.display = visible ? '' : 'none';
+      });
+  }
+
+  function filtrarPorCategoria() {
+      const catId = document.getElementById('filtro-categoria').value;
+      document.querySelectorAll('.pregunta-block').forEach(block => {
+          const blockCat = block.getAttribute('data-categoria');
+          block.style.display = (!catId || blockCat == catId) ? '' : 'none';
+      });
+  }
+
+  function buscarPregunta() {
+      const q = document.getElementById('buscar-pregunta').value.toLowerCase().trim();
+      document.querySelectorAll('.pregunta-block').forEach(block => {
+          const texto = block.textContent.toLowerCase();
+          const id = block.getAttribute('data-id') || '';
+          const matchId = q.startsWith('#') ? id === q.slice(1) : id.includes(q);
+          block.style.display = (texto.includes(q) || matchId) ? '' : 'none';
+      });
+  }
+</script>
+    <div th:replace="~{fragments/chatbot :: chatbot}"></div>
+</body>
+</html>
