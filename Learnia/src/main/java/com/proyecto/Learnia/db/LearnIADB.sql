@@ -2,6 +2,7 @@ drop database if exists Learnia_db_in5bm;
 create database Learnia_db_in5bm;
 use Learnia_db_in5bm;
 
+
 create table usuario(
                         id_usuario bigint auto_increment primary key,
                         nombre_usuario varchar(100) not null,
@@ -56,7 +57,6 @@ create table respuesta(
                           fecha_respuesta datetime default current_timestamp,
                           id_usuario bigint not null,
                           id_pregunta bigint not null,
-                          oculta boolean default false,
                           constraint fk_respuesta_usuario
                               foreign key (id_usuario) references usuario(id_usuario) on delete cascade,
                           constraint fk_respuesta_pregunta
@@ -86,10 +86,9 @@ create table voto(
                      constraint fk_idusuario
                          foreign key (id_usuario) references usuario(id_usuario) on delete cascade,
                      constraint fk_id_respuesta
-                         foreign key (id_respuesta) references respuesta(id_respuesta) on delete cascade,
-                     constraint uq_usuario_respuesta unique (id_usuario, id_respuesta)
+                         foreign key (id_respuesta) references respuesta(id_respuesta) on delete cascade
 );
-
+ALTER TABLE respuesta MODIFY COLUMN contenido TEXT NOT NULL;
 
 INSERT INTO usuario (nombre_usuario, correo_usuario, contrasena, fecha_registro, rol, foto, en_linea, bloqueado)
 VALUES
