@@ -10,6 +10,7 @@ import com.proyecto.Learnia.exception.SuccesException;
 import com.proyecto.Learnia.repository.CategoriaRepository;
 import com.proyecto.Learnia.repository.RecursoRepository;
 import com.proyecto.Learnia.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +25,9 @@ import java.util.UUID;
 
 @Service
 public class RecursoServiceImpl implements RecursoService{
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
 
     private final RecursoRepository recursoRepository;
     private final UsuarioRepository usuarioRepository;
@@ -79,7 +83,7 @@ public class RecursoServiceImpl implements RecursoService{
 
         String carpeta = categoria.getNombreCategoria().toLowerCase();
 
-        Path rutaCarpeta = Paths.get("uploads", carpeta);
+        Path rutaCarpeta = Paths.get(uploadDir, carpeta);
 
         if (!Files.exists(rutaCarpeta)) {
             Files.createDirectories(rutaCarpeta);

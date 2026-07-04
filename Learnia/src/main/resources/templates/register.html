@@ -179,7 +179,7 @@
 
         <div th:if="${error}" class="mensaje-error" th:text="${error}"></div>
 
-        <form th:action="@{/register}" th:object="${user}" method="post">
+        <form th:action="@{/register}" th:object="${user}" method="post" enctype="multipart/form-data">
             <div class="campo">
                 <label>Nombre de usuario</label>
                 <input type="text" th:field="*{nombreUsuario}" placeholder="Tu nombre" required>
