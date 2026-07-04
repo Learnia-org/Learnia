@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuevo Plan de Estudio | Learnia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    deepBlue: '#2C3E50', terracota: '#D35400',
+                    natureGreen: '#27AE60', eduCian: '#2980B9', solarYellow: '#F1C40F'
+                }
+            }
+        }
+    }
+  </script>
+  <style>
+    body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+  </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+  <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+  <a th:href="@{/plan-estudio}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver a Planes</a>
+</nav>
+
+<main class="max-w-2xl mx-auto p-8">
+  <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-10 space-y-8">
+    <div>
+      <h1 class="text-3xl font-black text-deepBlue mb-2">Generar Plan de Estudio</h1>
+      <p class="text-slate-500 font-medium">
+        Elige la materia y la fecha de tu examen. Dividiremos automáticamente el contenido
+        pendiente en tareas diarias y te avisaremos con recordatorios.
+      </p>
+    </div>
+
+    <div th:if="${error}" class="bg-terracota/10 border border-terracota/30 text-terracota font-bold text-sm p-4 rounded-2xl">
+      <i class="fa-solid fa-circle-exclamation mr-2"></i><span th:text="${error}">Error</span>
+    </div>
+
+    <form th:action="@{/plan-estudio/generar}" method="post" class="space-y-6">
+      <div class="space-y-2">
+        <label class="text-sm font-bold text-slate-600">Materia</label>
+        <select name="idCategoria" required class="w-full border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-terracota bg-white">
+          <option th:each="c : ${categorias}" th:value="${c.idCategoria}" th:text="${c.nombreCategoria}"></option>
+        </select>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-sm font-bold text-slate-600">Título del plan (opcional)</label>
+        <input type="text" name="titulo" placeholder="Ejemplo: Examen parcial de Álgebra"
+               class="w-full border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-terracota">
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-sm font-bold text-slate-600">Fecha del examen</label>
+        <input type="date" name="fechaExamen" required
+               class="w-full border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-terracota">
+      </div>
+
+      <button type="submit" class="w-full bg-terracota hover:bg-orange-700 text-white px-8 py-4 rounded-2xl font-black transition-all hover:scale-[1.01] shadow-lg">
+        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Generar Plan Automático
+      </button>
+    </form>
+  </div>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+</body>
+</html>

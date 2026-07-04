@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${plan.titulo + ' | Learnia'}">Plan | Learnia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    deepBlue: '#2C3E50', terracota: '#D35400',
+                    natureGreen: '#27AE60', eduCian: '#2980B9', solarYellow: '#F1C40F'
+                }
+            }
+        }
+    }
+  </script>
+  <style>
+    body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+  </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+  <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+  <a th:href="@{/plan-estudio}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver a Planes</a>
+</nav>
+
+<main class="max-w-4xl mx-auto p-8 space-y-8">
+
+  <div class="bg-terracota p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+    <div class="absolute -top-10 -right-10 opacity-10">
+      <i class="fa-solid fa-calendar-days text-[12rem] text-white rotate-12"></i>
+    </div>
+    <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div>
+        <h1 class="text-3xl font-black text-white leading-tight mb-2" th:text="${plan.titulo}">Plan</h1>
+        <p class="text-orange-50 font-medium">
+          <span th:text="${plan.categoria.nombreCategoria}">Materia</span> ·
+          Examen: <span th:text="${#temporals.format(plan.fechaExamen, 'dd/MM/yyyy')}">fecha</span>
+        </p>
+      </div>
+      <form th:action="@{/plan-estudio/{id}/eliminar(id=${plan.idPlan})}" method="post"
+            onsubmit="return confirm('¿Seguro que deseas eliminar este plan de estudio?');">
+        <button type="submit" class="bg-white/10 text-white px-5 py-3 rounded-2xl font-bold text-xs hover:bg-white/20 transition-all">
+          <i class="fa-solid fa-trash mr-2"></i>Eliminar plan
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 space-y-6">
+    <h2 class="text-xl font-black text-deepBlue">Calendario de estudio</h2>
+
+    <div th:if="${dias == null or #lists.isEmpty(dias)}" class="py-8 text-center text-slate-400 text-xs font-bold italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+      Este plan no tiene tareas asignadas.
+    </div>
+
+    <div th:each="dia, iter : ${dias}">
+      <div th:if="${iter.index == 0 or dias[iter.index - 1].numeroDia != dia.numeroDia}"
+           class="mt-6 mb-2 flex items-center gap-3">
+        <span class="bg-deepBlue text-white text-xs font-black px-3 py-1 rounded-full">Día <span th:text="${dia.numeroDia}">1</span></span>
+        <span class="text-xs text-slate-400 font-bold" th:text="${#temporals.format(dia.fecha, 'EEEE dd/MM/yyyy')}">fecha</span>
+      </div>
+
+      <div class="flex items-center justify-between gap-4 p-4 rounded-2xl border mb-2"
+           th:classappend="${dia.completado} ? 'bg-natureGreen/5 border-natureGreen/20' : 'bg-slate-50 border-slate-200'">
+        <div class="flex items-center gap-4">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+               th:classappend="${dia.completado} ? 'bg-natureGreen/10 text-natureGreen' : 'bg-slate-200 text-slate-500'">
+            <i class="fa-solid" th:classappend="${dia.completado} ? 'fa-check' : 'fa-book-open'"></i>
+          </div>
+          <div>
+            <p class="font-bold text-sm text-slate-700" th:text="${dia.tituloTema}">Tema</p>
+            <a th:if="${dia.recurso != null}" th:href="@{${dia.recurso.urlArchivo}}" target="_blank"
+               class="text-eduCian text-xs font-bold hover:underline">
+              <i class="fa-solid fa-eye mr-1"></i>Ver material
+            </a>
+          </div>
+        </div>
+
+        <form th:action="@{/plan-estudio/dia/{id}/completar(id=${dia.idDia})}" method="post">
+          <input type="hidden" name="idPlan" th:value="${plan.idPlan}">
+          <input type="hidden" name="completado" th:value="${!dia.completado}">
+          <button type="submit"
+                  class="px-4 py-2 rounded-xl font-bold text-xs transition-all"
+                  th:classappend="${dia.completado} ? 'bg-natureGreen text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'">
+            <span th:if="${dia.completado}"><i class="fa-solid fa-check mr-1"></i>Completado</span>
+            <span th:unless="${dia.completado}">Marcar como hecho</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+</body>
+</html>

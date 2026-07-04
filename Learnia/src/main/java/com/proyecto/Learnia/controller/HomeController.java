@@ -9,9 +9,8 @@ import com.proyecto.Learnia.repository.CategoriaRepository;
 import com.proyecto.Learnia.repository.PreguntaRepository;
 import com.proyecto.Learnia.repository.RespuestaRepository;
 import com.proyecto.Learnia.repository.UsuarioRepository;
+import com.proyecto.Learnia.service.PlanEstudioService;
 import com.proyecto.Learnia.service.PreguntaService;
-import com.proyecto.Learnia.service.FileStorageService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -40,7 +39,7 @@ public class HomeController {
     private final PreguntaRepository preguntaRepository;
     private final RespuestaRepository respuestaRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FileStorageService fileStorageService;
+    private final PlanEstudioService planEstudioService;
 
     public HomeController(UsuarioRepository usuarioRepository,
                           PreguntaService preguntaService,
@@ -48,14 +47,14 @@ public class HomeController {
                           PreguntaRepository preguntaRepository,
                           RespuestaRepository respuestaRepository,
                           PasswordEncoder passwordEncoder,
-                          FileStorageService fileStorageService) {
+                          PlanEstudioService planEstudioService) {
         this.usuarioRepository = usuarioRepository;
         this.preguntaService = preguntaService;
         this.categoriaRepository = categoriaRepository;
         this.preguntaRepository = preguntaRepository;
         this.respuestaRepository = respuestaRepository;
         this.passwordEncoder = passwordEncoder;
-        this.fileStorageService = fileStorageService;
+        this.planEstudioService = planEstudioService;
     }
 
     @GetMapping("/")
@@ -86,6 +85,7 @@ public class HomeController {
         model.addAttribute("usuario", usuario);
         model.addAttribute("preguntas", preguntas);
         model.addAttribute("categorias", categorias);
+        model.addAttribute("recordatorios", planEstudioService.obtenerRecordatorios(usuario.getIdUsuario()));
 
         return "menu-usuario";
     }
@@ -123,8 +123,14 @@ public class HomeController {
 
         if (imagenFile != null && !imagenFile.isEmpty()) {
             try {
-                String rutaPublica = fileStorageService.guardarFotoPerfil(imagenFile);
-                usuario.setFotoUsuario(rutaPublica);
+                String uploadDir = "uploads/perfiles/";
+                File dir = new File(uploadDir);
+                if (!dir.exists()) dir.mkdirs();
+
+                String filename = UUID.randomUUID() + "_" + imagenFile.getOriginalFilename();
+                Path path = Paths.get(uploadDir + filename);
+                Files.write(path, imagenFile.getBytes());
+                usuario.setFotoUsuario("/" + uploadDir + filename);
             } catch (IOException e) {
                 e.printStackTrace();
             }

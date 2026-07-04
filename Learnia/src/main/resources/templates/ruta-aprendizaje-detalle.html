@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${'Ruta de ' + ruta.categoria.nombreCategoria + ' | Learnia'}">Ruta | Learnia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    deepBlue: '#2C3E50', terracota: '#D35400',
+                    natureGreen: '#27AE60', eduCian: '#2980B9', solarYellow: '#F1C40F'
+                }
+            }
+        }
+    }
+  </script>
+  <style>
+    body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+  </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+  <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+  <a th:href="@{/ruta-aprendizaje}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver a Ruta de Aprendizaje</a>
+</nav>
+
+<main class="max-w-5xl mx-auto p-8 space-y-8">
+
+  <div class="bg-deepBlue p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+    <div class="absolute -top-10 -right-10 opacity-10">
+      <i class="fa-solid fa-diagram-project text-[12rem] text-white rotate-12"></i>
+    </div>
+    <div class="relative z-10 space-y-4">
+      <h1 class="text-4xl font-black text-white" th:text="${ruta.categoria.nombreCategoria}">Materia</h1>
+      <div class="w-full max-w-md bg-white/10 rounded-full h-3 overflow-hidden">
+        <div class="h-3 rounded-full bg-solarYellow" th:style="'width:' + ${ruta.porcentaje} + '%'"></div>
+      </div>
+      <p class="text-slate-300 font-medium text-sm">
+        <span th:text="${ruta.dominados}">0</span> de <span th:text="${ruta.totalRecursos}">0</span> temas dominados
+        (<span th:text="${ruta.porcentaje}">0</span>%)
+      </p>
+    </div>
+  </div>
+
+  <div th:if="${ruta.recomendado != null}" class="bg-solarYellow/10 border border-solarYellow/30 rounded-3xl p-6 flex items-center gap-5">
+    <div class="w-14 h-14 bg-solarYellow/20 text-solarYellow rounded-2xl flex items-center justify-center text-2xl">
+      <i class="fa-solid fa-lightbulb"></i>
+    </div>
+    <div>
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Recomendado para hoy</p>
+      <p class="text-lg font-black text-deepBlue" th:text="${ruta.recomendado.recurso.tituloRecurso}">Tema</p>
+    </div>
+  </div>
+  <div th:if="${ruta.recomendado == null and ruta.totalRecursos > 0}" class="bg-natureGreen/10 border border-natureGreen/30 rounded-3xl p-6 text-natureGreen font-bold">
+    <i class="fa-solid fa-trophy mr-2"></i>¡Felicidades! Ya dominas todos los temas de esta materia.
+  </div>
+
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 space-y-4">
+    <h2 class="text-xl font-black text-deepBlue">Temas en orden sugerido de estudio</h2>
+
+    <div th:if="${ruta.recursos == null or #lists.isEmpty(ruta.recursos)}"
+         class="py-8 text-center text-slate-400 text-xs font-bold italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+      Todavía no hay material subido para esta materia.
+    </div>
+
+    <div th:each="item, iter : ${ruta.recursos}"
+         class="rounded-3xl p-6 border flex flex-col md:flex-row md:items-center md:justify-between gap-5"
+         th:classappend="${item.dominado} ? 'bg-natureGreen/5 border-natureGreen/20' : (${ruta.recomendado != null and ruta.recomendado.recurso.idRecurso == item.recurso.idRecurso} ? 'bg-solarYellow/5 border-solarYellow/30' : 'bg-slate-50 border-slate-200')">
+
+      <div class="flex items-start gap-5">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-lg shrink-0"
+             th:classappend="${item.dominado} ? 'bg-natureGreen/10 text-natureGreen' : 'bg-slate-200 text-slate-500'">
+          <i class="fa-solid" th:classappend="${item.dominado} ? 'fa-check' : 'fa-book'"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black text-slate-400">#<span th:text="${iter.count}">1</span></span>
+            <h4 class="text-lg font-black text-slate-800" th:text="${item.recurso.tituloRecurso}">Tema</h4>
+          </div>
+          <p class="text-slate-500 text-sm mt-1" th:text="${item.recurso.descripcionRecurso}">Descripción</p>
+          <a th:href="@{${item.recurso.urlArchivo}}" target="_blank"
+             class="inline-flex items-center gap-2 text-eduCian text-xs font-bold mt-2 hover:underline">
+            <i class="fa-solid fa-eye"></i> Ver material
+          </a>
+        </div>
+      </div>
+
+      <form th:action="@{/ruta-aprendizaje/progreso}" method="post" class="flex flex-wrap items-center gap-3">
+        <input type="hidden" name="idRecurso" th:value="${item.recurso.idRecurso}">
+        <input type="hidden" name="idCategoria" th:value="${ruta.categoria.idCategoria}">
+
+        <label class="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <input type="checkbox" name="completado" value="true" th:checked="${item.completado}" class="w-4 h-4">
+          Ya lo vi
+        </label>
+
+        <select name="nivelDominio" class="border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-white">
+          <option value="0" th:selected="${item.nivelDominio == 0}">¿Qué tanto lo entiendes?</option>
+          <option value="1" th:selected="${item.nivelDominio == 1}">1 - Nada</option>
+          <option value="2" th:selected="${item.nivelDominio == 2}">2 - Poco</option>
+          <option value="3" th:selected="${item.nivelDominio == 3}">3 - Regular</option>
+          <option value="4" th:selected="${item.nivelDominio == 4}">4 - Bien</option>
+          <option value="5" th:selected="${item.nivelDominio == 5}">5 - Lo domino</option>
+        </select>
+
+        <button type="submit" class="bg-deepBlue text-white px-5 py-2 rounded-xl font-bold text-xs hover:bg-eduCian transition-all">
+          Guardar
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+</body>
+</html>

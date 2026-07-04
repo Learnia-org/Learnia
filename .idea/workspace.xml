@@ -5,107 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c9b0f04c-cccc-4b6d-a070-59c297cd9aa8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Learnia /.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/LearniaApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/config/SecurityBeans.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/config/SecurityConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/config/WebConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/AuthController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/CategoriaController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/ChatbotController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/ComentarioController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/CursoController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/HomeController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/PreguntaController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/PreguntaDetalleController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/PreguntaViewController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/RecursoController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/RespuestaController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/UsuarioController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/controller/VotoController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/db/LearnIADB.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/ChatMensajeDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/ChatRequestDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/ChatResponseDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/LoginRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/LoginResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/PreguntaDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/RecursoDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/RegisterRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/RespuestaDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/dto/VotoDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/Categoria.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/Comentario.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/Pregunta.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/Recurso.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/Respuesta.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/RolUsuario.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/TipoRecurso.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/TipoVoto.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/Usuario.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/entity/Voto.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/exception/GlobalExceptionHandler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/exception/ResourceNotFoundException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/exception/SuccesException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/repository/CategoriaRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/repository/ComentarioRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/repository/PreguntaRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/repository/RecursoRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/repository/RespuestaRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/repository/UsuarioRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/repository/VotoRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/AuthService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/CategoriaService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/CategoriaServiceImp.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/ComentarioService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/ComentarioServiceImp.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/GeminiService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/PreguntaService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/PreguntaServiceImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/RecursoService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/RecursoServiceImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/RespuestaService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/RespuestaServiceImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/UsuarioService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/UsuarioServiceImp.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/VotoService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/java/com/proyecto/Learnia/service/VotoServiceImp.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/static/img/Image.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/static/img/default-avatar.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/static/img/dudas.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/static/img/learnia.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/static/img/learnia.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/admin-categorias.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/admin-preguntas.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/admin-usuarios.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/curso-detalle.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/cursos/fisica.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/cursos/informatica.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/cursos/ingles.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/cursos/matematica.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/fragments/chatbot.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/home.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/login.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/menu-admin.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/menu-usuario.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/mis-preguntas.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/pregunta-detalle.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/preguntar.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/register.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/respuesta.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/main/resources/templates/usuarios-view.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /src/test/java/com/proyecto/Learnia/LearniaApplicationTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /uploads/física/98170cb4-f06d-4212-974b-9555eca67d9e_ht3fifuuu.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /uploads/inglés/44e89bc4-56dd-49d9-aec0-119111ab09d2_" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /uploads/inglés/a923e0a2-cced-463a-ab8c-1d0026b6343a_Pizarra Online Mapa Mental Esquema Conceptos Ideas Ilustrado Colores Pasteles (1).pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /uploads/inglés/bcfa0c9f-c4aa-4c36-b338-ce998a8c854d_TECNOTAREA.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Learnia /uploads/matemática/0a2a62df-e421-4240-b346-2259058c7918_Evaluación Tecnica Bimestral (Rúbrica) - copia.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -139,13 +39,13 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;feature/renovacion-crud&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/erosdusan/Documents/Proyectos/Learnia&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Hansel/Documents/Learnia&quot;
   }
 }</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+        <option value="bundled-jdk-30f59d01ecdd-26cb7f24e5b0-intellij.indexing.shared.core-IU-253.29346.240" />
       </set>
     </attachedChunks>
   </component>

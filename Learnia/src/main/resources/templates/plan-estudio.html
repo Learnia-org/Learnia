@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan de Estudio | Learnia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    deepBlue: '#2C3E50', terracota: '#D35400',
+                    natureGreen: '#27AE60', eduCian: '#2980B9', solarYellow: '#F1C40F'
+                }
+            }
+        }
+    }
+  </script>
+  <style>
+    body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+  </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+  <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+  <a th:href="@{/menu}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver al Inicio</a>
+</nav>
+
+<main class="max-w-5xl mx-auto p-8 space-y-8">
+
+  <div class="bg-terracota p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+    <div class="absolute -top-10 -right-10 opacity-10">
+      <i class="fa-solid fa-calendar-check text-[12rem] text-white rotate-12"></i>
+    </div>
+    <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div>
+        <h1 class="text-4xl font-black text-white leading-tight mb-3">Modo Estudio Inteligente</h1>
+        <p class="text-orange-50 font-medium max-w-xl">
+          Dinos cuándo es tu examen y armamos un plan día por día con recordatorios automáticos.
+        </p>
+      </div>
+      <a th:href="@{/plan-estudio/nuevo}"
+         class="inline-flex items-center justify-center space-x-3 bg-white text-terracota px-8 py-4 rounded-2xl font-black text-sm hover:bg-slate-100 hover:scale-105 transition-all shadow-lg whitespace-nowrap">
+        <i class="fa-solid fa-plus"></i><span>Nuevo Plan</span>
+      </a>
+    </div>
+  </div>
+
+  <div th:if="${recordatorios != null and !#lists.isEmpty(recordatorios)}" class="bg-white p-6 rounded-3xl border border-solarYellow/30 shadow-sm space-y-3">
+    <div class="flex items-center space-x-2">
+      <i class="fa-solid fa-bell text-solarYellow"></i>
+      <h3 class="font-black text-deepBlue text-sm uppercase tracking-widest">Recordatorios</h3>
+    </div>
+    <div class="space-y-2">
+      <a th:each="r : ${recordatorios}" th:href="@{/plan-estudio/{id}(id=${r.idPlan})}"
+         class="flex items-center justify-between p-3 rounded-2xl border transition-all hover:shadow-md"
+         th:classappend="${r.tipo == 'atrasado'} ? 'bg-terracota/5 border-terracota/20' : (${r.tipo == 'examen'} ? 'bg-eduCian/5 border-eduCian/20' : 'bg-natureGreen/5 border-natureGreen/20')">
+        <span class="text-xs font-bold text-slate-600" th:text="${r.mensaje}">Recordatorio</span>
+        <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+      </a>
+    </div>
+  </div>
+
+  <div th:if="${planes == null or #lists.isEmpty(planes)}" class="bg-white p-12 rounded-[2.5rem] border border-slate-100 text-center">
+    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200 text-3xl">
+      <i class="fa-solid fa-calendar-plus"></i>
+    </div>
+    <h4 class="font-black text-deepBlue mb-2 text-lg">Aún no tienes planes de estudio</h4>
+    <p class="text-slate-400 text-sm max-w-xs mx-auto">Crea uno indicando la materia y la fecha de tu examen.</p>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <a th:each="p : ${planes}" th:href="@{/plan-estudio/{id}(id=${p.plan.idPlan})}"
+       class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow space-y-4 block">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-black text-deepBlue" th:text="${p.plan.titulo}">Plan</h3>
+        <span th:if="${p.finalizado}" class="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-slate-100 text-slate-500">Finalizado</span>
+        <span th:unless="${p.finalizado}" class="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-eduCian/10 text-eduCian"
+              th:text="${p.diasRestantes} + (${p.diasRestantes == 1} ? ' día restante' : ' días restantes')">3 días</span>
+      </div>
+      <p class="text-sm text-slate-500 font-medium">
+        <i class="fa-solid fa-graduation-cap mr-1"></i>
+        <span th:text="${p.plan.categoria.nombreCategoria}">Materia</span> ·
+        Examen: <span th:text="${#temporals.format(p.plan.fechaExamen, 'dd/MM/yyyy')}">fecha</span>
+      </p>
+      <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+        <div class="h-3 rounded-full bg-terracota" th:style="'width:' + ${p.porcentaje} + '%'"></div>
+      </div>
+      <p class="text-xs text-slate-400 font-bold">
+        <span th:text="${p.tareasCompletadas}">0</span> / <span th:text="${p.totalTareas}">0</span> tareas completadas
+      </p>
+    </a>
+  </div>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+</body>
+</html>

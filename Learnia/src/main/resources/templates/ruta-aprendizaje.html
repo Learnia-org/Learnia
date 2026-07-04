@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruta de Aprendizaje | Learnia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        deepBlue: '#2C3E50', terracota: '#D35400',
+                        natureGreen: '#27AE60', eduCian: '#2980B9', solarYellow: '#F1C40F'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+    </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+    <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+    <a th:href="@{/menu}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver al Inicio</a>
+</nav>
+
+<main class="max-w-6xl mx-auto p-8 space-y-8">
+
+    <div class="bg-natureGreen p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+        <div class="absolute -top-10 -right-10 opacity-10">
+            <i class="fa-solid fa-route text-[13rem] text-white rotate-12"></i>
+        </div>
+        <div class="relative z-10">
+            <h1 class="text-4xl font-black text-white leading-tight mb-3">Ruta de Aprendizaje Personalizada</h1>
+            <p class="text-green-50 font-medium max-w-2xl">
+                Analizamos tu rendimiento en cada materia para decirte exactamente qué estudiar después
+                y saltamos los temas que ya dominas.
+            </p>
+        </div>
+    </div>
+
+    <div th:if="${resumen == null or #lists.isEmpty(resumen)}"
+         class="bg-white p-12 rounded-[2.5rem] border border-slate-100 text-center">
+        <p class="text-slate-400 font-bold">Todavía no hay materias activas para mostrar una ruta.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        <div th:each="r : ${resumen}" class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow space-y-5">
+            <div class="flex items-center justify-between">
+                <h3 class="text-2xl font-black text-deepBlue" th:text="${r.categoria.nombreCategoria}">Materia</h3>
+                <span class="text-xs font-black uppercase px-3 py-1 rounded-full"
+                      th:classappend="${r.porcentaje == 100} ? 'bg-natureGreen/10 text-natureGreen' : 'bg-eduCian/10 text-eduCian'"
+                      th:text="${r.porcentaje} + '% dominado'">0% dominado</span>
+            </div>
+
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                <div class="h-3 rounded-full bg-natureGreen transition-all" th:style="'width:' + ${r.porcentaje} + '%'"></div>
+            </div>
+
+            <p class="text-sm text-slate-500 font-medium">
+                <span th:text="${r.dominados}">0</span> de <span th:text="${r.totalRecursos}">0</span> temas dominados
+            </p>
+
+            <div th:if="${r.siguienteRecomendado != null}" class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sugerencia de estudio</p>
+                <p class="text-sm font-bold text-deepBlue" th:text="${r.siguienteRecomendado.tituloRecurso}">Siguiente tema</p>
+            </div>
+            <div th:if="${r.siguienteRecomendado == null and r.totalRecursos > 0}" class="bg-natureGreen/10 border border-natureGreen/20 rounded-2xl p-4">
+                <p class="text-sm font-bold text-natureGreen"><i class="fa-solid fa-circle-check mr-2"></i>¡Dominas todos los temas disponibles!</p>
+            </div>
+            <div th:if="${r.totalRecursos == 0}" class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                <p class="text-sm font-bold text-slate-400">Aún no hay material subido en esta materia.</p>
+            </div>
+
+            <a th:href="@{/ruta-aprendizaje/{id}(id=${r.categoria.idCategoria})}"
+               class="inline-flex items-center space-x-2 bg-deepBlue text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-eduCian transition-all">
+                <span>Ver ruta completa</span><i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+</body>
+</html>
