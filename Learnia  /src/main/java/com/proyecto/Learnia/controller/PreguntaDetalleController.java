@@ -42,11 +42,23 @@ public class PreguntaDetalleController {
                               @AuthenticationPrincipal UserDetails userDetails) {
 
         Pregunta pregunta = preguntaService.buscarPorId(id);
-        List<Respuesta> respuestas = respuestaRepository.findByPregunta_IdPregunta(id);
 
         Usuario usuario = usuarioRepository
                 .findByCorreoUsuario(userDetails.getUsername())
                 .orElseThrow();
+
+        boolean esAutor = pregunta.getUsuario().getIdUsuario().equals(usuario.getIdUsuario());
+        boolean esStaff = usuario.getRolUsuario() == com.proyecto.Learnia.entity.RolUsuario.ADMIN
+                || usuario.getRolUsuario() == com.proyecto.Learnia.entity.RolUsuario.MODERADOR;
+
+        if (pregunta.isOculta() && !esAutor && !esStaff) {
+            return "redirect:/menu";
+        }
+
+        List<Respuesta> todas = respuestaRepository.findByPregunta_IdPregunta(id);
+        List<Respuesta> respuestas = todas.stream()
+                .filter(r -> !r.isOculta() || r.getUsuario().getIdUsuario().equals(usuario.getIdUsuario()))
+                .toList();
 
         Map<Long, long[]> votosMap = new HashMap<>();
         Map<Long, String> votoUsuarioMap = new HashMap<>();

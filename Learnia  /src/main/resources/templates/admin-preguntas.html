@@ -173,6 +173,7 @@
           <div th:if="${p.respuestas != null and not #lists.isEmpty(p.respuestas)}" class="divide-y divide-slate-100">
             <div th:each="r : ${p.respuestas}"
                  th:id="'respuesta-' + ${r.idRespuesta}"
+                 th:classappend="${r.oculta} ? ' pregunta-oculta' : ''"
                  class="respuesta-row mx-4 my-3 p-4 rounded-2xl">
               <div class="flex items-start justify-between gap-3">
                 <div class="flex-1 min-w-0">
@@ -183,15 +184,27 @@
                           th:text="${r.usuario?.nombreUsuario ?: 'Anónimo'}">Usuario</span>
                     <span class="text-[10px] text-slate-400"
                           th:text="${#temporals.format(r.fechaRespuesta, 'dd/MM/yyyy HH:mm')}">fecha</span>
+                    <span th:if="${r.oculta}" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-terracota/10 text-terracota uppercase">
+                                        <i class="fa-solid fa-eye-slash mr-1"></i>Oculta
+                                    </span>
                   </div>
                   <p class="text-xs text-slate-600 leading-relaxed" th:text="${r.contenido}">Contenido</p>
                 </div>
-                <form th:action="@{/admin/respuestas/{id}/eliminar(id=${r.idRespuesta})}" method="post" class="shrink-0"
-                      onsubmit="return confirm('¿Eliminar esta respuesta?')">
-                  <button type="submit" class="px-3 py-1.5 bg-white text-slate-400 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition-all border border-slate-200" title="Eliminar respuesta">
-                    <i class="fa-solid fa-trash text-xs"></i>
-                  </button>
-                </form>
+                <div class="flex items-center gap-2 shrink-0">
+                  <form th:action="@{/admin/respuestas/{id}/ocultar(id=${r.idRespuesta})}" method="post" class="inline">
+                    <button type="submit"
+                            th:class="${r.oculta} ? 'px-3 py-1.5 bg-natureGreen/10 text-natureGreen rounded-xl text-xs font-bold hover:bg-natureGreen hover:text-white transition-all' : 'px-3 py-1.5 bg-terracota/10 text-terracota rounded-xl text-xs font-bold hover:bg-terracota hover:text-white transition-all'"
+                            th:title="${r.oculta} ? 'Mostrar' : 'Ocultar'">
+                      <i th:class="${r.oculta} ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i>
+                    </button>
+                  </form>
+                  <form th:action="@{/admin/respuestas/{id}/eliminar(id=${r.idRespuesta})}" method="post" class="shrink-0"
+                        onsubmit="return confirm('¿Eliminar esta respuesta?')">
+                    <button type="submit" class="px-3 py-1.5 bg-white text-slate-400 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition-all border border-slate-200" title="Eliminar respuesta">
+                      <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           </div>

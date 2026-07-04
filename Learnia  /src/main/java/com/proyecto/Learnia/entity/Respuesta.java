@@ -40,4 +40,7 @@ public class Respuesta {
     @JoinColumn(name = "id_pregunta", nullable = false)
     private Pregunta pregunta;
 
+    @Column(name = "oculta", columnDefinition = "boolean default false")
+    private boolean oculta = false;
+
 }

@@ -27,17 +27,20 @@ public class RespuestaServiceImpl implements RespuestaService {
     private final UsuarioRepository usuarioRepository;
     private final PreguntaRepository preguntaRepository;
     private final PasswordEncoder passwordEncoder;
+    private final GeminiService geminiService;
 
     public RespuestaServiceImpl(
             RespuestaRepository respuestaRepository,
             UsuarioRepository usuarioRepository,
             PreguntaRepository preguntaRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            GeminiService geminiService) {
 
         this.respuestaRepository = respuestaRepository;
         this.usuarioRepository = usuarioRepository;
         this.preguntaRepository = preguntaRepository;
         this.passwordEncoder = passwordEncoder;
+        this.geminiService = geminiService;
     }
 
     @Override
@@ -69,6 +72,8 @@ public class RespuestaServiceImpl implements RespuestaService {
         respuesta.setFechaRespuesta(LocalDateTime.now());
         respuesta.setPregunta(pregunta);
         respuesta.setUsuario(usuario);
+        respuesta.setOculta(geminiService.contieneContenidoProhibido(contenido)
+                || !geminiService.esContenidoCoherente(contenido));
 
         return respuestaRepository.save(respuesta);
     }

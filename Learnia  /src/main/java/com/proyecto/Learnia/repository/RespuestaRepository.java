@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface RespuestaRepository extends JpaRepository<Respuesta, Long> {
     List<Respuesta> findByPregunta_IdPregunta(Long idPregunta);
+    List<Respuesta> findByPregunta_IdPreguntaAndOcultaFalse(Long idPregunta);
     List<Respuesta> findByUsuario_IdUsuario(Long idUsuario);
     long countByUsuario_IdUsuario(Long idUsuario);
 

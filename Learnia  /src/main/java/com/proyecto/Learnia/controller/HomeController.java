@@ -66,7 +66,16 @@ public class HomeController {
                 .findByCorreoUsuario(userDetails.getUsername())
                 .orElseThrow();
 
-        List<Pregunta> preguntas = preguntaService.listar();
+        List<Pregunta> visibles = preguntaService.listar();
+        List<Pregunta> propiasPendientes = preguntaRepository.findByUsuario_IdUsuario(usuario.getIdUsuario())
+                .stream()
+                .filter(Pregunta::isOculta)
+                .toList();
+
+        List<Pregunta> preguntas = new java.util.ArrayList<>(visibles);
+        preguntas.addAll(propiasPendientes);
+        preguntas.sort((a, b) -> b.getFechaPublicacion().compareTo(a.getFechaPublicacion()));
+
         List<Categoria> categorias = categoriaRepository.findByActivaTrue();
 
         model.addAttribute("usuario", usuario);
@@ -286,6 +295,15 @@ public class HomeController {
         } catch (Exception e) {
             return "redirect:/admin/preguntas?errorEliminar";
         }
+        return "redirect:/admin/preguntas";
+    }
+
+    @PostMapping("/admin/respuestas/{id}/ocultar")
+    public String ocultarRespuesta(@PathVariable Long id) {
+        respuestaRepository.findById(id).ifPresent(r -> {
+            r.setOculta(!r.isOculta());
+            respuestaRepository.save(r);
+        });
         return "redirect:/admin/preguntas";
     }
 

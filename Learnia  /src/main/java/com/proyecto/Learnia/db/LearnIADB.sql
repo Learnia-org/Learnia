@@ -56,6 +56,7 @@ create table respuesta(
                           fecha_respuesta datetime default current_timestamp,
                           id_usuario bigint not null,
                           id_pregunta bigint not null,
+                          oculta boolean default false,
                           constraint fk_respuesta_usuario
                               foreign key (id_usuario) references usuario(id_usuario) on delete cascade,
                           constraint fk_respuesta_pregunta

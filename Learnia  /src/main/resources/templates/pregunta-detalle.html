@@ -142,7 +142,10 @@
                     <p class="text-[10px] text-slate-400 font-bold"
                        th:text="${#temporals.format(r.fechaRespuesta, 'dd/MM/yyyy HH:mm')}">Fecha</p>
                 </div>
-                <div class="ml-auto">
+                <div class="ml-auto flex items-center gap-2">
+                    <span th:if="${r.oculta}" class="text-[10px] font-black text-terracota bg-terracota/10 px-3 py-1 rounded-full uppercase">
+                        <i class="fa-solid fa-hourglass-half mr-1"></i>Pendiente de revisión
+                    </span>
                     <span class="text-[10px] font-black text-natureGreen bg-natureGreen/10 px-3 py-1 rounded-full uppercase">
                         <i class="fa-solid fa-check mr-1"></i>Respuesta
                     </span>

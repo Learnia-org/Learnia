@@ -37,7 +37,7 @@ public class PreguntaServiceImpl implements PreguntaService {
 
     @Override
     public List<Pregunta> listar() {
-        return preguntaRepository.findAll();
+        return preguntaRepository.findByOcultaFalse();
     }
 
 
@@ -45,7 +45,7 @@ public class PreguntaServiceImpl implements PreguntaService {
     public List<Pregunta> buscarPorCategoria(Long idCategoria) {
 
         return preguntaRepository
-                .findByCategoria_IdCategoria(idCategoria);
+                .findByCategoria_IdCategoriaAndOcultaFalse(idCategoria);
 
     }
 
@@ -67,8 +67,35 @@ public class PreguntaServiceImpl implements PreguntaService {
         pregunta.setUsuario(usuario);
         pregunta.setCategoria(categoria);
         pregunta.setFechaPublicacion(LocalDateTime.now());
+
+        String contenidoCompleto = dto.getTitulo() + ". " + dto.getDescripcion();
+        boolean contieneProhibido = geminiService.contieneContenidoProhibido(contenidoCompleto);
+        boolean tieneSentido = !contieneProhibido && geminiService.esContenidoCoherente(contenidoCompleto);
+        boolean valida = false;
+        String respuestaGenerada = null;
+
+        if (tieneSentido) {
+            GeminiService.ResultadoPregunta resultado = geminiService.evaluarPregunta(
+                    dto.getTitulo(), dto.getDescripcion(), categoria.getNombreCategoria());
+            valida = resultado.valida();
+            respuestaGenerada = resultado.respuesta();
+        }
+
+        pregunta.setOculta(!valida);
         Pregunta guardada = preguntaRepository.save(pregunta);
-        generarRespuestaAutomatica(guardada);
+
+        if (valida) {
+            if (respuestaGenerada != null && !respuestaGenerada.isBlank()) {
+                try {
+                    respuestaService.guardarComoIA(guardada.getIdPregunta(), respuestaGenerada);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                generarRespuestaAutomatica(guardada);
+            }
+        }
+
         return guardada;
     }
 
@@ -97,8 +124,12 @@ public class PreguntaServiceImpl implements PreguntaService {
 
     private void generarRespuestaAutomatica(Pregunta pregunta) {
         try {
-            String respuestaIA = geminiService.generarRespuestaParaPregunta(pregunta.getTitulo(), pregunta.getDescripcion());
-            respuestaService.guardarComoIA(pregunta.getIdPregunta(), respuestaIA);
+            GeminiService.ResultadoPregunta resultado = geminiService.evaluarPregunta(
+                    pregunta.getTitulo(), pregunta.getDescripcion(),
+                    pregunta.getCategoria() != null ? pregunta.getCategoria().getNombreCategoria() : "");
+            if (resultado.respuesta() != null && !resultado.respuesta().isBlank()) {
+                respuestaService.guardarComoIA(pregunta.getIdPregunta(), resultado.respuesta());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
