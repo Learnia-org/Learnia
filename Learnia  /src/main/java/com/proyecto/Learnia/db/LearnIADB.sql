@@ -85,7 +85,8 @@ create table voto(
                      constraint fk_idusuario
                          foreign key (id_usuario) references usuario(id_usuario) on delete cascade,
                      constraint fk_id_respuesta
-                         foreign key (id_respuesta) references respuesta(id_respuesta) on delete cascade
+                         foreign key (id_respuesta) references respuesta(id_respuesta) on delete cascade,
+                     constraint uq_usuario_respuesta unique (id_usuario, id_respuesta)
 );
 
 

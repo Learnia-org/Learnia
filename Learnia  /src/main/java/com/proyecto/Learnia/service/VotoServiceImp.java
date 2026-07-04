@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
 @Service
 public class VotoServiceImp implements VotoService {
 
@@ -38,6 +39,22 @@ public class VotoServiceImp implements VotoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         Respuesta respuesta = respuestaRepository.findById(dto.getIdRespuesta())
                 .orElseThrow(() -> new ResourceNotFoundException("Respuesta no encontrada con ID: " + dto.getIdRespuesta()));
+
+        List<Voto> existentes = votoRepository
+                .findAllByUsuario_IdUsuarioAndRespuesta_IdRespuestaOrderByIdVotoDesc(
+                        dto.getIdUsuario(), dto.getIdRespuesta());
+
+        if (!existentes.isEmpty()) {
+            Voto principal = existentes.get(0);
+            principal.setTipoVoto(dto.getTipoVoto());
+            Voto guardado = votoRepository.save(principal);
+            // Si por datos antiguos hubiera más de un voto del mismo usuario en la misma respuesta, se eliminan los sobrantes
+            if (existentes.size() > 1) {
+                votoRepository.deleteAll(existentes.subList(1, existentes.size()));
+            }
+            return guardado;
+        }
+
         Voto voto = new Voto();
         voto.setTipoVoto(dto.getTipoVoto());
         voto.setUsuario(usuario);

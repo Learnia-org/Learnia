@@ -56,9 +56,12 @@ public class PreguntaDetalleController {
             long dislikes = votoRepository.countByRespuesta_IdRespuestaAndTipoVoto(r.getIdRespuesta(), TipoVoto.DISLIKE);
             votosMap.put(r.getIdRespuesta(), new long[]{likes, dislikes});
 
-            votoRepository.findByUsuario_IdUsuarioAndRespuesta_IdRespuesta(
-                            usuario.getIdUsuario(), r.getIdRespuesta())
-                    .ifPresent(v -> votoUsuarioMap.put(r.getIdRespuesta(), v.getTipoVoto().name()));
+            List<com.proyecto.Learnia.entity.Voto> votosUsuario = votoRepository
+                    .findAllByUsuario_IdUsuarioAndRespuesta_IdRespuestaOrderByIdVotoDesc(
+                            usuario.getIdUsuario(), r.getIdRespuesta());
+            if (!votosUsuario.isEmpty()) {
+                votoUsuarioMap.put(r.getIdRespuesta(), votosUsuario.get(0).getTipoVoto().name());
+            }
         }
 
         model.addAttribute("pregunta", pregunta);

@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
-@Table(name = "voto")
+@Table(name = "voto", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_usuario_respuesta", columnNames = {"id_usuario", "id_respuesta"})
+})
 @Getter
 @Setter
 @ToString
