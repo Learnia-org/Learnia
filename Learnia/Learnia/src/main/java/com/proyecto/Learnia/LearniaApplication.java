@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @Slf4j
 @SpringBootApplication
-public class        LearniaApplication implements CommandLineRunner {
+public class LearniaApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
 		SpringApplication.run(LearniaApplication.class, args);
