@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learnia | Mensajes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        deepBlue:'#2C3E50', terracota:'#D35400',
+                        natureGreen:'#27AE60', eduCian:'#2980B9', solarYellow:'#F1C40F'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #fcfdfd; }
+        .glass-card { background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .no-scrollbar::-webkit-scrollbar { width: 6px; }
+        .no-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .conv-item.activa { background: linear-gradient(to right,#2980B9,#2C3E50); color: white; }
+        .conv-item.activa .conv-sub { color: rgba(255,255,255,0.7) !important; }
+        .bubble-propio { background: linear-gradient(to right,#2980B9,#2C3E50); color: white; border-radius: 1.25rem 1.25rem 0.25rem 1.25rem; }
+        .bubble-otro { background: #f1f5f9; color: #2C3E50; border-radius: 1.25rem 1.25rem 1.25rem 0.25rem; }
+    </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white/80 backdrop-blur-md px-8 py-4 flex justify-between items-center sticky top-0 z-50 border-b border-slate-100 shadow-sm">
+    <div class="flex items-center space-x-4">
+        <a th:href="@{/menu}" class="text-3xl font-black tracking-tighter text-deepBlue">LEAR<span class="text-eduCian">NIA</span></a>
+        <div class="h-6 w-px bg-slate-200 hidden md:block"></div>
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] hidden md:block">Mensajes Privados</span>
+    </div>
+    <div class="flex items-center space-x-6">
+        <div class="flex items-center space-x-3">
+            <a th:href="@{/usuario}">
+                <img th:src="${usuario.fotoUsuario != null and !#strings.isEmpty(usuario.fotoUsuario) ? usuario.fotoUsuario : '/img/default-avatar.png'}"
+                     class="w-9 h-9 rounded-xl object-cover border-2 border-slate-100 cursor-pointer" alt="Foto de perfil">
+            </a>
+            <span class="text-sm font-bold text-deepBlue hidden md:block" th:text="${usuario.nombreUsuario}">Usuario</span>
+        </div>
+        <a th:href="@{/menu}" class="text-slate-400 hover:text-eduCian transition-colors" title="Volver al inicio">
+            <i class="fa-solid fa-house text-lg"></i>
+        </a>
+    </div>
+</nav>
+
+<main class="max-w-6xl mx-auto p-6">
+    <div class="grid grid-cols-12 gap-0 bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden" style="height: calc(100vh - 130px);">
+
+        <!-- Columna izquierda: buscador + conversaciones -->
+        <div class="col-span-4 border-r border-slate-100 flex flex-col h-full">
+            <div class="p-5 border-b border-slate-100">
+                <h2 class="font-black text-lg mb-3">Mensajes</h2>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
+                    <input type="text" id="buscadorUsuarios" placeholder="Buscar usuario por nombre..."
+                           class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3 pl-10 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-eduCian transition-all">
+                </div>
+                <div id="resultadosBusqueda" class="mt-2 space-y-1 hidden"></div>
+            </div>
+
+            <div th:if="${asistente != null}"
+                 class="conv-item p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-all border-b border-slate-100"
+                 th:attr="data-id=${asistente.idUsuario}, data-nombre=${asistente.nombreUsuario}, data-foto=${asistente.fotoUsuario}"
+                 onclick="abrirConversacion(this.dataset.id, this.dataset.nombre, this.dataset.foto)">
+                <div class="relative">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-eduCian to-deepBlue flex items-center justify-center text-white">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-natureGreen border-2 border-white rounded-full"></span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm truncate flex items-center gap-2">
+                        Asistente IA
+                        <span class="bg-eduCian/10 text-eduCian text-[9px] font-black px-2 py-0.5 rounded-full uppercase">IA</span>
+                    </p>
+                    <p id="asistenteUltimoMensaje" class="conv-sub text-xs text-slate-400 truncate"
+                       th:text="${conversacionAsistente != null ? conversacionAsistente.ultimoMensaje : 'Pregúntame lo que quieras sobre tus materias'}">Pregúntame lo que quieras</p>
+                </div>
+                <span id="asistenteBadge"
+                      th:if="${conversacionAsistente != null and conversacionAsistente.noLeidos > 0}"
+                      class="bg-terracota text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center"
+                      th:text="${conversacionAsistente != null ? conversacionAsistente.noLeidos : 0}">1</span>
+            </div>
+
+            <div id="listaConversaciones" class="flex-1 overflow-y-auto no-scrollbar divide-y divide-slate-50">
+                <div th:if="${#lists.isEmpty(conversaciones)}" class="p-8 text-center text-slate-400 text-sm">
+                    <i class="fa-solid fa-comments text-3xl mb-3 text-slate-200"></i>
+                    <p class="font-bold">Aún no tienes conversaciones</p>
+                    <p class="text-xs">Busca a un usuario para empezar a chatear.</p>
+                </div>
+                <div th:each="c : ${conversaciones}"
+                     class="conv-item p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-all"
+                     th:attr="data-id=${c.idUsuario}, data-nombre=${c.nombreUsuario}, data-foto=${c.fotoUsuario}"
+                     onclick="abrirConversacion(this.dataset.id, this.dataset.nombre, this.dataset.foto)">
+                    <div class="relative">
+                        <img th:src="${c.fotoUsuario != null and !#strings.isEmpty(c.fotoUsuario) ? c.fotoUsuario : '/img/default-avatar.png'}"
+                             class="w-11 h-11 rounded-xl object-cover" alt="Avatar">
+                        <span th:if="${c.enLinea}" class="absolute -bottom-1 -right-1 w-3 h-3 bg-natureGreen border-2 border-white rounded-full"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-sm truncate" th:text="${c.nombreUsuario}">Nombre</p>
+                        <p class="conv-sub text-xs text-slate-400 truncate" th:text="${c.ultimoMensaje}">Último mensaje...</p>
+                    </div>
+                    <span th:if="${c.noLeidos > 0}"
+                          class="bg-terracota text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center"
+                          th:text="${c.noLeidos}">1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: chat activo -->
+        <div class="col-span-8 flex flex-col h-full">
+            <div id="estadoVacio" class="flex-1 flex flex-col items-center justify-center text-slate-300">
+                <i class="fa-solid fa-paper-plane text-5xl mb-4"></i>
+                <p class="font-bold text-slate-400">Selecciona una conversación o busca a alguien</p>
+            </div>
+
+            <div id="chatActivo" class="hidden flex-col h-full flex-1">
+                <div class="p-4 border-b border-slate-100 flex items-center gap-3">
+                    <img id="chatFoto" src="/img/default-avatar.png" class="w-10 h-10 rounded-xl object-cover" alt="Avatar">
+                    <span id="chatNombre" class="font-black">Nombre</span>
+                </div>
+                <div id="chatMensajes" class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-3"></div>
+                <form id="formEnviar" class="p-4 border-t border-slate-100 flex items-center gap-3">
+                    <input type="text" id="inputMensaje" maxlength="1000" autocomplete="off"
+                           placeholder="Escribe un mensaje..."
+                           class="flex-1 bg-slate-50 border border-slate-100 rounded-2xl py-3 px-5 text-sm font-medium outline-none focus:ring-2 focus:ring-eduCian transition-all">
+                    <button type="submit"
+                            class="bg-eduCian text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:scale-105 transition-all shadow-lg shadow-eduCian/30">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    const MI_ID = /*[[${usuario.idUsuario}]]*/ 0;
+    const ASISTENTE_ID = /*[[${asistente != null ? asistente.idUsuario : 0}]]*/ 0;
+    let idConversacionActual = null;
+    let pollingChat = null;
+    let pollingLista = null;
+
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    function abrirConversacion(id, nombre, foto) {
+        idConversacionActual = Number(id);
+        document.getElementById('estadoVacio').classList.add('hidden');
+        document.getElementById('chatActivo').classList.remove('hidden');
+        document.getElementById('chatActivo').classList.add('flex');
+        document.getElementById('chatNombre').textContent = nombre;
+        document.getElementById('chatFoto').src = (foto && foto.trim() !== '') ? foto : '/img/default-avatar.png';
+        document.getElementById('resultadosBusqueda').classList.add('hidden');
+        document.getElementById('buscadorUsuarios').value = '';
+
+        cargarMensajes();
+        if (pollingChat) clearInterval(pollingChat);
+        pollingChat = setInterval(cargarMensajes, 3000);
+    }
+
+    async function cargarMensajes() {
+        if (!idConversacionActual) return;
+        try {
+            const res = await fetch('/api/mensajes/conversacion/' + idConversacionActual);
+            const mensajes = await res.json();
+            const cont = document.getElementById('chatMensajes');
+            const estabaAbajo = cont.scrollTop + cont.clientHeight >= cont.scrollHeight - 40;
+
+            cont.innerHTML = mensajes.map(m => `
+                <div class="flex ${m.propio ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-[70%] px-4 py-3 text-sm font-medium ${m.propio ? 'bubble-propio' : 'bubble-otro'}">
+                        ${escapeHtml(m.contenido)}
+                    </div>
+                </div>
+            `).join('');
+
+            if (estabaAbajo || mensajes.length <= 20) {
+                cont.scrollTop = cont.scrollHeight;
+            }
+            actualizarListaConversaciones();
+        } catch (e) { console.error(e); }
+    }
+
+    document.getElementById('formEnviar').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const input = document.getElementById('inputMensaje');
+        const contenido = input.value.trim();
+        if (!contenido || !idConversacionActual) return;
+        input.value = '';
+        try {
+            await fetch('/api/mensajes/enviar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ receptorId: idConversacionActual, contenido: contenido })
+            });
+            cargarMensajes();
+        } catch (e) { console.error(e); }
+    });
+
+    let debounceTimer;
+    document.getElementById('buscadorUsuarios').addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const q = this.value.trim();
+        const cajaResultados = document.getElementById('resultadosBusqueda');
+        if (q.length < 2) {
+            cajaResultados.classList.add('hidden');
+            cajaResultados.innerHTML = '';
+            return;
+        }
+        debounceTimer = setTimeout(async () => {
+            const res = await fetch('/api/mensajes/buscar-usuarios?q=' + encodeURIComponent(q));
+            const usuarios = await res.json();
+            if (usuarios.length === 0) {
+                cajaResultados.innerHTML = '<p class="text-xs text-slate-400 p-3">Sin resultados</p>';
+            } else {
+                cajaResultados.innerHTML = usuarios.map(u => `
+                    <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer"
+                         onclick="abrirConversacion(${u.idUsuario}, '${escapeHtml(u.nombreUsuario)}', '${u.fotoUsuario}')">
+                        <img src="${u.fotoUsuario && u.fotoUsuario.trim() !== '' ? u.fotoUsuario : '/img/default-avatar.png'}"
+                             class="w-9 h-9 rounded-xl object-cover">
+                        <span class="text-sm font-bold">${escapeHtml(u.nombreUsuario)}</span>
+                    </div>
+                `).join('');
+            }
+            cajaResultados.classList.remove('hidden');
+        }, 300);
+    });
+
+    async function actualizarListaConversaciones() {
+        try {
+            const res = await fetch('/api/mensajes/conversaciones');
+            const todas = await res.json();
+
+            const conversacionAsistente = todas.find(c => c.idUsuario === ASISTENTE_ID);
+            const badgeAsistente = document.getElementById('asistenteBadge');
+            const subAsistente = document.getElementById('asistenteUltimoMensaje');
+            if (conversacionAsistente) {
+                if (subAsistente) subAsistente.textContent = conversacionAsistente.ultimoMensaje;
+                if (badgeAsistente) {
+                    if (conversacionAsistente.noLeidos > 0 && idConversacionActual !== ASISTENTE_ID) {
+                        badgeAsistente.textContent = conversacionAsistente.noLeidos;
+                        badgeAsistente.classList.remove('hidden');
+                    } else {
+                        badgeAsistente.classList.add('hidden');
+                    }
+                }
+            }
+
+            const conversaciones = todas.filter(c => c.idUsuario !== ASISTENTE_ID);
+            const cont = document.getElementById('listaConversaciones');
+            if (conversaciones.length === 0) return;
+            cont.innerHTML = conversaciones.map(c => `
+                <div class="conv-item p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-all ${c.idUsuario === idConversacionActual ? 'activa' : ''}"
+                     onclick="abrirConversacion(${c.idUsuario}, '${escapeHtml(c.nombreUsuario)}', '${c.fotoUsuario || ''}')">
+                    <div class="relative">
+                        <img src="${c.fotoUsuario && c.fotoUsuario.trim() !== '' ? c.fotoUsuario : '/img/default-avatar.png'}"
+                             class="w-11 h-11 rounded-xl object-cover">
+                        ${c.enLinea ? '<span class="absolute -bottom-1 -right-1 w-3 h-3 bg-natureGreen border-2 border-white rounded-full"></span>' : ''}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-sm truncate">${escapeHtml(c.nombreUsuario)}</p>
+                        <p class="conv-sub text-xs text-slate-400 truncate">${escapeHtml(c.ultimoMensaje)}</p>
+                    </div>
+                    ${c.noLeidos > 0 && c.idUsuario !== idConversacionActual ? `<span class="bg-terracota text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">${c.noLeidos}</span>` : ''}
+                </div>
+            `).join('');
+        } catch (e) { console.error(e); }
+    }
+
+    /*[# th:if="${contactoInicial != null}"]*/
+    abrirConversacion(
+        /*[[${contactoInicial.idUsuario}]]*/ 0,
+        /*[[${contactoInicial.nombreUsuario}]]*/ '',
+        /*[[${contactoInicial.fotoUsuario}]]*/ ''
+    );
+    /*[/]*/
+
+    pollingLista = setInterval(actualizarListaConversaciones, 5000);
+</script>
+
+</body>
+</html>

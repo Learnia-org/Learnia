@@ -88,6 +88,11 @@
                 <span class="mx-2">·</span>
                 <i class="fa-solid fa-tag text-terracota"></i>
                 <span th:text="${pregunta.categoria.nombreCategoria}">Categoría</span>
+                <a th:if="${pregunta.usuario.idUsuario != usuario.idUsuario}"
+                   th:href="@{/mensajes(con=${pregunta.usuario.idUsuario})}"
+                   class="ml-auto inline-flex items-center gap-1 text-eduCian hover:text-deepBlue transition-colors">
+                    <i class="fa-solid fa-message"></i> Contactar
+                </a>
             </div>
         </div>
     </div>
@@ -143,6 +148,11 @@
                        th:text="${#temporals.format(r.fechaRespuesta, 'dd/MM/yyyy HH:mm')}">Fecha</p>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
+                    <a th:if="${r.usuario.idUsuario != usuario.idUsuario}"
+                       th:href="@{/mensajes(con=${r.usuario.idUsuario})}"
+                       class="text-[10px] font-black text-eduCian bg-eduCian/10 px-3 py-1 rounded-full uppercase hover:bg-eduCian hover:text-white transition-all">
+                        <i class="fa-solid fa-message mr-1"></i>Contactar
+                    </a>
                     <span th:if="${r.oculta}" class="text-[10px] font-black text-terracota bg-terracota/10 px-3 py-1 rounded-full uppercase">
                         <i class="fa-solid fa-hourglass-half mr-1"></i>Pendiente de revisión
                     </span>

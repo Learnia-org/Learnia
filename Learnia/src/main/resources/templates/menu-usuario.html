@@ -36,6 +36,10 @@
         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] hidden md:block">Explorar Dudas</span>
     </div>
     <div class="flex items-center space-x-6">
+        <a th:href="@{/mensajes}" class="relative text-slate-400 hover:text-eduCian transition-colors" title="Mensajes privados">
+            <i class="fa-solid fa-message text-lg"></i>
+            <span id="badgeNoLeidos" class="hidden absolute -top-2 -right-2 bg-terracota text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </a>
         <div class="flex items-center space-x-3">
             <a th:href="@{/usuario}">
                 <img th:src="${usuario.fotoUsuario != null and !#strings.isEmpty(usuario.fotoUsuario) ? usuario.fotoUsuario : '/img/default-avatar.png'}"
@@ -133,6 +137,14 @@
     </aside>
 
     <section class="col-span-12 lg:col-span-7 space-y-8">
+        <div class="bg-white p-3 rounded-3xl border border-slate-100 shadow-sm">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-6 top-1/2 -translate-y-1/2 text-eduCian"></i>
+                <input type="text" id="search-preguntas" oninput="buscarPreguntas(this.value)"
+                       placeholder="Buscar preguntas por título o contenido..."
+                       class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-deepBlue outline-none focus:ring-2 focus:ring-eduCian focus:bg-white transition-all">
+            </div>
+        </div>
         <div class="bg-deepBlue p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
             <div class="absolute top-0 right-0 p-8 opacity-10">
                 <i class="fa-solid fa-graduation-cap text-[8rem] text-white rotate-12"></i>
@@ -225,6 +237,8 @@
                      th:data-categoria="${p.categoria != null ? p.categoria.idCategoria : ''}"
                      th:data-catnombre="${p.categoria != null ? p.categoria.nombreCategoria : ''}"
                      th:data-fecha="${p.fechaPublicacion}"
+                     th:data-titulo="${p.titulo}"
+                     th:data-desc="${p.descripcion}"
                      class="pregunta-card bg-white p-6 rounded-3xl border border-slate-100 hover:shadow-xl hover:shadow-eduCian/5 transition-all group">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-3">
@@ -352,6 +366,13 @@
         aplicarFiltros();
     }
 
+    let textoBusquedaGlobal = '';
+
+    function buscarPreguntas(valor) {
+        textoBusquedaGlobal = (valor || '').toLowerCase().trim();
+        aplicarFiltros();
+    }
+
     function aplicarFiltros() {
         const cards = document.querySelectorAll('.pregunta-card');
         let visibles = [];
@@ -359,10 +380,18 @@
         cards.forEach(card => {
             const catNombre = card.getAttribute('data-catnombre') || '';
             const catId = card.getAttribute('data-categoria') || '';
+            const titulo = (card.getAttribute('data-titulo') || '').toLowerCase();
+            const desc = (card.getAttribute('data-desc') || '').toLowerCase();
 
-            const visible = categoriaActual === null ||
+            const coincideCategoria = categoriaActual === null ||
                             catNombre.toLowerCase().trim() === categoriaActual.toLowerCase().trim() ||
                             catId == categoriaActual;
+
+            const coincideTexto = textoBusquedaGlobal === '' ||
+                            titulo.includes(textoBusquedaGlobal) ||
+                            desc.includes(textoBusquedaGlobal);
+
+            const visible = coincideCategoria && coincideTexto;
 
             card.style.display = visible ? '' : 'none';
             if (visible) visibles.push(card);
@@ -400,6 +429,23 @@
         });
         cards.forEach(c => lista.appendChild(c));
     }
+
+    function actualizarBadgeMensajes() {
+        fetch('/api/mensajes/no-leidos')
+            .then(r => r.json())
+            .then(data => {
+                const badge = document.getElementById('badgeNoLeidos');
+                if (data.noLeidos > 0) {
+                    badge.textContent = data.noLeidos > 9 ? '9+' : data.noLeidos;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            })
+            .catch(() => {});
+    }
+    actualizarBadgeMensajes();
+    setInterval(actualizarBadgeMensajes, 8000);
 </script>
 <div th:replace="~{fragments/chatbot :: chatbot}"></div>
 </body>

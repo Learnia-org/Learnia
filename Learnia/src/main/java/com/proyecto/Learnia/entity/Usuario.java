@@ -59,6 +59,9 @@ public class Usuario {
     @Column(name = "ultimo_acceso")
     private LocalDateTime ultimoAcceso;
 
+    @Column(name = "es_bot", columnDefinition = "boolean default false")
+    private boolean esBot = false;
+
     public Usuario(String nombreUsuario, String correoUsuario, String contrasenaUsuario) {
         this.nombreUsuario = nombreUsuario;
         this.correoUsuario = correoUsuario;

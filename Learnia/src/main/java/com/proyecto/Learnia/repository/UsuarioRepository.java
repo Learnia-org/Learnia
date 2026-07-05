@@ -15,4 +15,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findTop5ByOrderByUltimoAccesoDesc();
     long countByEnLineaTrue();
     long countByBloqueadoFalse();
+
+    List<Usuario> findByNombreUsuarioContainingIgnoreCaseAndIdUsuarioNot(String nombreUsuario, Long idUsuario);
+
+    java.util.Optional<Usuario> findByEsBotTrue();
 }
