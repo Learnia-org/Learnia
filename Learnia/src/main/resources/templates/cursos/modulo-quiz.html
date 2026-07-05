@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${modulo.titulo} + ' | Learnia'">Módulo | Learnia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+        .subject-active { background: linear-gradient(to right, #7c3aed, #8b5cf6); color: white !important; }
+        .opcion-label { transition: all .15s ease; }
+        .opcion-label:hover { border-color: #94a3b8; }
+        input[type=radio]:checked + .opcion-label { border-color: #6366f1; background-color: #eef2ff; }
+        html.dark input[type=radio]:checked + .opcion-label { border-color: #818cf8 !important; background-color: rgba(99,102,241,0.25) !important; color: #e0e7ff !important; }
+        html.dark .opcion-label:hover { border-color: #94a3b8 !important; }
+    </style>
+</head>
+<body class="font-sans text-slate-800 antialiased">
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+    <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+    <a th:href="@{/menu}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver al Inicio</a>
+</nav>
+
+<main class="max-w-5xl mx-auto space-y-8 p-8">
+    <div>
+        <a th:href="@{/materias/{curso}/modulos(curso=${curso})}" class="inline-flex items-center gap-2 font-bold text-sm text-slate-500 hover:text-slate-800 mb-4">
+            <i class="fa-solid fa-arrow-left"></i><span th:text="'Volver a módulos de ' + ${tema.nombre}"></span>
+        </a>
+
+        <div th:class="${tema.colorFondo} + ' p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl'">
+            <div class="absolute -top-10 -right-10 opacity-10">
+                <i th:class="${modulo.icono} + ' text-[13rem] text-white rotate-12'"></i>
+            </div>
+            <div class="relative z-10">
+                <span class="bg-white/20 text-white px-4 py-1.5 rounded-full font-black text-xs" th:text="'Módulo ' + ${modulo.numero} + ' de 6'"></span>
+                <h1 class="text-4xl font-black text-white leading-tight mt-4 mb-3" th:text="${modulo.titulo}"></h1>
+                <p class="text-white/90 font-medium text-lg max-w-2xl" th:text="${modulo.descripcion}"></p>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${resultado != null}"
+         th:class="(${resultado.aprobado} ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200') + ' border-2 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6'">
+        <div class="flex items-center gap-5">
+            <div th:class="(${resultado.aprobado} ? 'bg-green-500' : 'bg-red-500') + ' w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl'">
+                <i th:class="${resultado.aprobado} ? 'fa-solid fa-trophy' : 'fa-solid fa-rotate-left'"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black" th:text="${resultado.aprobado} ? '¡Muy bien, aprobaste el módulo!' : 'Puedes intentarlo de nuevo'"></h2>
+                <p class="text-slate-500 font-semibold">
+                    Obtuviste <span th:text="${resultado.correctas}"></span> de <span th:text="${resultado.totalPreguntas}"></span> respuestas correctas
+                    (<span th:text="${resultado.porcentaje}"></span>%)
+                </p>
+            </div>
+        </div>
+        <a th:href="@{/materias/{curso}/modulos/{numero}(curso=${curso}, numero=${modulo.numero})}"
+           class="bg-white border border-slate-200 hover:bg-slate-50 px-6 py-3 rounded-2xl font-black text-sm shadow-sm">
+            <i class="fa-solid fa-rotate mr-2"></i>Reintentar módulo
+        </a>
+    </div>
+
+    <form th:action="@{/materias/{curso}/modulos/{numero}(curso=${curso}, numero=${modulo.numero})}" method="post" class="space-y-6">
+        <div th:each="pregunta, iter : ${preguntas}" class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-start gap-4 mb-6">
+                <span th:class="${tema.colorSuave} + ' ' + ${tema.colorTexto} + ' w-9 h-9 flex-shrink-0 rounded-xl flex items-center justify-center font-black text-sm'"
+                      th:text="${iter.index + 1}"></span>
+                <h3 class="text-xl font-black text-slate-800 pt-1" th:text="${pregunta.enunciado}"></h3>
+
+                <span th:if="${resultado != null}"
+                      th:class="(${resultado.aciertos.get(pregunta.idPreguntaModulo)} ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600') + ' ml-auto flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center'">
+                    <i th:class="${resultado.aciertos.get(pregunta.idPreguntaModulo)} ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
+                </span>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 pl-13">
+                <div th:each="op : ${#strings.arraySplit('A,B,C,D', ',')}">
+                    <input type="radio"
+                           th:id="${'p' + pregunta.idPreguntaModulo + '_' + op}"
+                           th:name="${'pregunta_' + pregunta.idPreguntaModulo}"
+                           th:value="${op}"
+                           th:checked="${resultado != null and resultado.respuestasUsuario.get(pregunta.idPreguntaModulo) == op}"
+                           th:disabled="${resultado != null}"
+                           class="hidden">
+                    <label th:for="${'p' + pregunta.idPreguntaModulo + '_' + op}"
+                           th:class="'opcion-label cursor-pointer flex items-center gap-3 border-2 rounded-2xl px-5 py-4 font-semibold text-slate-600 '
+                                     + (${resultado != null and pregunta.respuestaCorrecta == op} ? 'border-green-400 bg-green-50 text-green-700' :
+                                       (${resultado != null and resultado.respuestasUsuario.get(pregunta.idPreguntaModulo) == op} ? 'border-red-400 bg-red-50 text-red-700' : 'border-slate-200'))">
+                        <span class="w-7 h-7 rounded-full border-2 border-current flex items-center justify-center text-xs font-black" th:text="${op}"></span>
+                        <span th:switch="${op}">
+                            <span th:case="'A'" th:text="${pregunta.opcionA}"></span>
+                            <span th:case="'B'" th:text="${pregunta.opcionB}"></span>
+                            <span th:case="'C'" th:text="${pregunta.opcionC}"></span>
+                            <span th:case="'D'" th:text="${pregunta.opcionD}"></span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <div th:if="${resultado != null and pregunta.explicacion != null and !pregunta.explicacion.isBlank()}"
+                 class="mt-5 bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-600">
+                <i class="fa-solid fa-lightbulb text-amber-400 mr-2"></i><span th:text="${pregunta.explicacion}"></span>
+            </div>
+        </div>
+
+        <div th:if="${resultado == null}" class="flex justify-end">
+            <button type="submit" th:class="${tema.colorFondo} + ' text-white px-10 py-4 rounded-2xl font-black text-sm shadow-lg hover:scale-105 transition-all'">
+                <i class="fa-solid fa-paper-plane mr-2"></i>Enviar respuestas
+            </button>
+        </div>
+    </form>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+<div th:replace="~{fragments/darkmode :: darkmode}"></div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${tema.nombre} + ' - Módulos | Learnia'">Módulos | Learnia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+        .subject-active { background: linear-gradient(to right, #7c3aed, #8b5cf6); color: white !important; }
+    </style>
+</head>
+<body class="font-sans text-slate-800 antialiased">
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+    <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+    <a th:href="@{/menu}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver al Inicio</a>
+</nav>
+
+<main class="max-w-7xl mx-auto grid grid-cols-12 gap-8 p-8">
+    <aside class="col-span-12 lg:col-span-2 space-y-6">
+        <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest pl-2">Materias</h2>
+        <nav class="flex lg:flex-col gap-2 overflow-x-auto pb-4">
+            <a th:href="@{/materias/matematica}" th:classappend="${curso == 'matematica'} ? 'subject-active shadow-md' : 'text-slate-500 hover:bg-slate-100'" class="flex items-center space-x-3 p-3 px-5 rounded-2xl transition-all">
+                <i class="fa-solid fa-calculator w-5"></i><span class="text-sm font-bold">Mates</span>
+            </a>
+            <a th:href="@{/materias/fisica}" th:classappend="${curso == 'fisica'} ? 'subject-active shadow-md' : 'text-slate-500 hover:bg-slate-100'" class="flex items-center space-x-3 p-3 px-5 rounded-2xl transition-all">
+                <i class="fa-solid fa-atom w-5"></i><span class="text-sm font-bold">Física</span>
+            </a>
+            <a th:href="@{/materias/ingles}" th:classappend="${curso == 'ingles'} ? 'subject-active shadow-md' : 'text-slate-500 hover:bg-slate-100'" class="flex items-center space-x-3 p-3 px-5 rounded-2xl transition-all">
+                <i class="fa-solid fa-language w-5"></i><span class="text-sm font-bold">Inglés</span>
+            </a>
+            <a th:href="@{/materias/informatica}" th:classappend="${curso == 'informatica'} ? 'subject-active shadow-md' : 'text-slate-500 hover:bg-slate-100'" class="flex items-center space-x-3 p-3 px-5 rounded-2xl transition-all">
+                <i class="fa-solid fa-terminal w-5"></i><span class="text-sm font-bold">Informática</span>
+            </a>
+        </nav>
+    </aside>
+
+    <section class="col-span-12 lg:col-span-10 space-y-8">
+        <div th:class="${tema.colorFondo} + ' p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl'">
+            <div class="absolute -top-10 -right-10 opacity-10">
+                <i th:class="${tema.icono} + ' text-[15rem] text-white rotate-12'"></i>
+            </div>
+            <div class="relative z-10">
+                <a th:href="@{/materias/{curso}(curso=${curso})}" class="inline-flex items-center space-x-2 text-white/80 hover:text-white font-bold text-sm mb-4">
+                    <i class="fa-solid fa-arrow-left"></i><span th:text="'Volver a ' + ${tema.nombre}"></span>
+                </a>
+                <h1 class="text-5xl font-black text-white leading-tight mb-4">Módulos de <span th:text="${tema.nombre}"></span></h1>
+                <p class="text-white/90 font-medium mb-2 text-lg max-w-2xl">Pon a prueba tus conocimientos básicos resolviendo los 6 módulos de esta materia.</p>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div th:if="${modulos == null or #lists.isEmpty(modulos)}" class="xl:col-span-3 py-12 text-center text-slate-400 text-sm font-bold italic bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                Todavía no hay módulos disponibles para esta materia.
+            </div>
+
+            <a th:each="modulo : ${modulos}"
+               th:href="@{/materias/{curso}/modulos/{numero}(curso=${curso}, numero=${modulo.numero})}"
+               class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all block">
+                <div class="flex items-center justify-between mb-6">
+                    <div th:class="${tema.colorSuave} + ' w-14 h-14 rounded-2xl flex items-center justify-center'">
+                        <i th:class="${modulo.icono} + ' ' + ${tema.colorTexto} + ' text-2xl'"></i>
+                    </div>
+                    <span th:class="${tema.colorSuave} + ' ' + ${tema.colorTexto} + ' px-4 py-1.5 rounded-full font-black text-xs'"
+                          th:text="'Módulo ' + ${modulo.numero}"></span>
+                </div>
+                <h3 class="text-2xl font-black mb-3" th:text="${modulo.titulo}"></h3>
+                <p class="text-slate-500 mb-6" th:text="${modulo.descripcion}"></p>
+                <span th:class="${tema.colorTexto} + ' font-black text-sm inline-flex items-center gap-2'">
+                    Comenzar quiz <i class="fa-solid fa-arrow-right"></i>
+                </span>
+            </a>
+        </div>
+    </section>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+<div th:replace="~{fragments/darkmode :: darkmode}"></div>
+</body>
+</html>

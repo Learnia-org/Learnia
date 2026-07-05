@@ -75,6 +75,47 @@ create table voto(
                      constraint fk_id_respuesta
                          foreign key (id_respuesta) references respuesta(id_respuesta) on delete cascade
 );
+create table comentario(
+                           id_comentario bigint auto_increment primary key,
+                           contenido text not null,
+                           fecha datetime default current_timestamp,
+                           id_usuario bigint not null,
+                           id_recurso bigint null,
+                           id_respuesta bigint null,
+                           constraint fk_usuario
+                               foreign key (id_usuario) references usuario(id_usuario) on delete cascade,
+                           constraint fk_respuesta
+                               foreign key (id_respuesta) references respuesta(id_respuesta) on delete cascade,
+                           constraint fk_recurso
+                               foreign key (id_recurso) references recurso(id_recurso) on delete cascade
+);
+
+create table modulo(
+                       id_modulo bigint auto_increment primary key,
+                       numero int not null,
+                       titulo varchar(100) not null,
+                       descripcion varchar(255),
+                       icono varchar(100),
+                       id_categoria bigint not null,
+                       constraint fk_modulo_categoria
+                           foreign key (id_categoria) references categoria(id_categoria) on delete cascade,
+                       constraint uq_categoria_numero unique (id_categoria, numero)
+);
+
+create table modulo_pregunta(
+                                id_pregunta_modulo bigint auto_increment primary key,
+                                enunciado text not null,
+                                opcion_a varchar(255) not null,
+                                opcion_b varchar(255) not null,
+                                opcion_c varchar(255) not null,
+                                opcion_d varchar(255) not null,
+                                respuesta_correcta char(1) not null,
+                                explicacion text,
+                                id_modulo bigint not null,
+                                constraint fk_pregunta_modulo
+                                    foreign key (id_modulo) references modulo(id_modulo) on delete cascade
+);
+
 ALTER TABLE respuesta MODIFY COLUMN contenido TEXT NOT NULL;
 
 INSERT INTO usuario (nombre_usuario, correo_usuario, contrasena, fecha_registro, rol, foto, en_linea, bloqueado)

@@ -49,9 +49,14 @@
             <div class="relative z-10">
                 <h1 class="text-5xl font-black text-white leading-tight mb-4">Matemática</h1>
                 <p class="text-indigo-100 font-medium mb-8 text-lg max-w-2xl">Domina el lenguaje de los números, desde el álgebra básica hasta el cálculo avanzado.</p>
-                <a th:href="@{/preguntar}" class="inline-flex items-center space-x-3 bg-white text-indigo-600 px-8 py-4 rounded-2xl font-black text-sm hover:bg-slate-100 hover:scale-105 transition-all shadow-lg">
-                    <i class="fa-solid fa-circle-question"></i><span>Hacer una Pregunta</span>
-                </a>
+                <div class="flex flex-wrap gap-4">
+                    <a th:href="@{/preguntar}" class="inline-flex items-center space-x-3 bg-white text-indigo-600 px-8 py-4 rounded-2xl font-black text-sm hover:bg-slate-100 hover:scale-105 transition-all shadow-lg">
+                        <i class="fa-solid fa-circle-question"></i><span>Hacer una Pregunta</span>
+                    </a>
+                    <a th:href="@{/materias/matematica/modulos}" class="inline-flex items-center space-x-3 bg-indigo-800/40 border-2 border-white/40 text-white px-8 py-4 rounded-2xl font-black text-sm hover:bg-indigo-800/60 hover:scale-105 transition-all">
+                        <i class="fa-solid fa-graduation-cap"></i><span>Ver Módulos</span>
+                    </a>
+                </div>
             </div>
         </div>
 
