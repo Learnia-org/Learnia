@@ -105,12 +105,6 @@ public class RutaAprendizajeServiceImpl implements RutaAprendizajeService {
         recursoProgresoRepository.save(progreso);
     }
 
-    /**
-     * Arma la lista de recursos de una categoría ordenada según prioridad de estudio:
-     * 1) temas nunca vistos (en el orden en que se subieron)
-     * 2) temas vistos pero con bajo nivel de dominio (los más débiles primero)
-     * 3) temas ya dominados, al final
-     */
     private List<RecursoRutaDTO> construirListaOrdenada(Long idUsuario, Long idCategoria) {
         List<Recurso> recursos = recursoRepository.findByCategoria_IdCategoria(idCategoria);
 

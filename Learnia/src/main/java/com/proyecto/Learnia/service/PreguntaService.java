@@ -1,6 +1,7 @@
 package com.proyecto.Learnia.service;
 
 import com.proyecto.Learnia.dto.PreguntaDTO;
+import com.proyecto.Learnia.dto.PreguntaSimilarDTO;
 import com.proyecto.Learnia.entity.Pregunta;
 import java.util.List;
 
@@ -11,4 +12,5 @@ public interface PreguntaService {
     Pregunta actualizar(Long id, PreguntaDTO dto);
     void eliminar(Long id);
     List<Pregunta> buscarPorCategoria(Long idCategoria);
+    List<PreguntaSimilarDTO> buscarSimilares(String texto, Long idCategoria);
 }

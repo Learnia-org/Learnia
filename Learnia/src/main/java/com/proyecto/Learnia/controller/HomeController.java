@@ -61,7 +61,14 @@ public class HomeController {
     public String index(Model model) {
         List<Pregunta> preguntas = preguntaService.listar();
         model.addAttribute("preguntas", preguntas);
+        model.addAttribute("estudiantesConectados", usuarioRepository.countByEnLineaTrue());
         return "home";
+    }
+
+    @GetMapping("/api/public/estado-comunidad")
+    @ResponseBody
+    public java.util.Map<String, Long> estadoComunidad() {
+        return java.util.Map.of("enLinea", usuarioRepository.countByEnLineaTrue());
     }
 
     @GetMapping("/menu")
@@ -99,9 +106,28 @@ public class HomeController {
         long totalDudas = preguntaRepository.findByUsuario_IdUsuario(usuario.getIdUsuario()).size();
         long totalAportes = respuestaRepository.countByUsuario_IdUsuario(usuario.getIdUsuario());
 
+        List<java.util.Map<String, String>> insignias = new java.util.ArrayList<>();
+        if (totalDudas >= 1) {
+            insignias.add(java.util.Map.of("nombre", "Primeros pasos", "icono", "fa-shoe-prints",
+                    "detalle", "Publicaste tu primera pregunta", "color", "eduCian"));
+        }
+        if (totalAportes >= 10) {
+            insignias.add(java.util.Map.of("nombre", "Mentor", "icono", "fa-medal",
+                    "detalle", "Diste 10 o más respuestas a la comunidad", "color", "natureGreen"));
+        }
+        for (Object[] fila : respuestaRepository.countRespuestasPorCategoria(usuario.getIdUsuario())) {
+            String categoria = (String) fila[0];
+            Long cantidad = (Long) fila[1];
+            if (cantidad >= 5) {
+                insignias.add(java.util.Map.of("nombre", "Experto en " + categoria, "icono", "fa-star",
+                        "detalle", "Ya diste " + cantidad + " respuestas en " + categoria, "color", "solarYellow"));
+            }
+        }
+
         model.addAttribute("usuario", usuario);
         model.addAttribute("totalDudas", totalDudas);
         model.addAttribute("totalAportes", totalAportes);
+        model.addAttribute("insignias", insignias);
         return "usuarios-view";
     }
 

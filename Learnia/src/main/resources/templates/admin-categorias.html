@@ -17,7 +17,6 @@
 </head>
 <body class="bg-slate-50 text-deepBlue antialiased">
 <div class="flex">
-    <!-- Sidebar Admin -->
     <aside class="w-72 h-screen bg-deepBlue text-white p-8 sticky top-0 flex flex-col">
         <div class="text-2xl font-black mb-12 tracking-tighter">
             LEAR<span class="text-eduCian">NIA</span>
@@ -60,7 +59,6 @@
             </div>
         </header>
 
-        <!-- Stats -->
         <div class="grid grid-cols-3 gap-6 mb-10">
             <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
                 <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Categorías</p>
@@ -76,7 +74,6 @@
             </div>
         </div>
 
-        <!-- Tabs Activas / Inactivas -->
         <div class="flex space-x-4 mb-6">
             <button onclick="mostrarTab('activas')" id="tab-activas"
                     class="px-6 py-2.5 bg-natureGreen text-white rounded-xl text-xs font-bold transition-all">
@@ -88,7 +85,6 @@
             </button>
         </div>
 
-        <!-- Panel Activas -->
         <div id="panel-activas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style="display:grid">
             <div th:each="cat : ${activas}"
                  class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-lg transition-all">
@@ -102,7 +98,6 @@
                 <p class="text-xs text-slate-400 mb-6 leading-relaxed" th:text="${cat.descripcionCategoria}">Descripcion</p>
 
                 <div class="flex space-x-2">
-                    <!-- Editar -->
                     <button type="button" onclick="abrirModalEditar(this)"
                             th:data-id="${cat.idCategoria}"
                             th:data-nombre="${cat.nombreCategoria}"
@@ -110,13 +105,11 @@
                             class="flex-1 py-2 bg-eduCian/10 text-eduCian rounded-xl text-xs font-bold hover:bg-eduCian hover:text-white transition-all">
                         <i class="fa-solid fa-pen mr-1"></i>Editar
                     </button>
-                    <!-- Desactivar -->
                     <form th:action="@{/admin/categorias/{id}/toggleActiva(id=${cat.idCategoria})}" method="post">
                         <button type="submit" class="py-2 px-3 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold hover:bg-terracota/10 hover:text-terracota transition-all" title="Desactivar">
                             <i class="fa-solid fa-eye-slash"></i>
                         </button>
                     </form>
-                    <!-- Eliminar -->
                     <form th:action="@{/admin/categorias/{id}/eliminar(id=${cat.idCategoria})}" method="post"
                           onsubmit="return confirm('¿Eliminar esta categoría? Se eliminarán también sus preguntas asociadas.')">
                         <button type="submit" class="py-2 px-3 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition-all" title="Eliminar">
@@ -133,7 +126,6 @@
             </div>
         </div>
 
-        <!-- Panel Inactivas -->
         <div id="panel-inactivas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style="display:none">
             <div th:each="cat : ${inactivas}"
                  class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm opacity-70 hover:opacity-100 transition-all">
@@ -147,13 +139,11 @@
                 <p class="text-xs text-slate-400 mb-6 leading-relaxed" th:text="${cat.descripcionCategoria}">Descripcion</p>
 
                 <div class="flex space-x-2">
-                    <!-- Activar -->
                     <form th:action="@{/admin/categorias/{id}/toggleActiva(id=${cat.idCategoria})}" method="post" class="flex-1">
                         <button type="submit" class="w-full py-2 bg-natureGreen/10 text-natureGreen rounded-xl text-xs font-bold hover:bg-natureGreen hover:text-white transition-all">
                             <i class="fa-solid fa-eye mr-1"></i>Activar
                         </button>
                     </form>
-                    <!-- Editar -->
                     <button type="button" onclick="abrirModalEditar(this)"
                             th:data-id="${cat.idCategoria}"
                             th:data-nombre="${cat.nombreCategoria}"
@@ -161,7 +151,6 @@
                             class="py-2 px-3 bg-eduCian/10 text-eduCian rounded-xl text-xs font-bold hover:bg-eduCian hover:text-white transition-all">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <!-- Eliminar -->
                     <form th:action="@{/admin/categorias/{id}/eliminar(id=${cat.idCategoria})}" method="post"
                           onsubmit="return confirm('¿Eliminar esta categoría?')">
                         <button type="submit" class="py-2 px-3 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition-all">
@@ -180,7 +169,6 @@
     </main>
 </div>
 
-<!-- Modal Crear -->
 <div id="modal-crear" class="modal-overlay">
     <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl mx-4">
         <div class="flex justify-between items-center mb-6">
@@ -216,7 +204,6 @@
     </div>
 </div>
 
-<!-- Modal Editar -->
 <div id="modal-editar" class="modal-overlay">
     <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl mx-4">
         <div class="flex justify-between items-center mb-6">
@@ -281,7 +268,6 @@
         document.getElementById(id).classList.remove('active');
     }
 
-    // Cerrar modales al click fuera
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', function(e) {
             if (e.target === this) cerrarModal(this.id);
@@ -289,5 +275,6 @@
     });
 </script>
     <div th:replace="~{fragments/chatbot :: chatbot}"></div>
+<div th:replace="~{fragments/darkmode :: darkmode}"></div>
 </body>
 </html>

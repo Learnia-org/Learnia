@@ -18,5 +18,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     List<Usuario> findByNombreUsuarioContainingIgnoreCaseAndIdUsuarioNot(String nombreUsuario, Long idUsuario);
 
-    java.util.Optional<Usuario> findByEsBotTrue();
+    List<Usuario> findByEsBotTrue();
 }

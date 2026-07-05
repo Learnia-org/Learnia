@@ -48,7 +48,6 @@ public class VotoServiceImp implements VotoService {
             Voto principal = existentes.get(0);
             principal.setTipoVoto(dto.getTipoVoto());
             Voto guardado = votoRepository.save(principal);
-            // Si por datos antiguos hubiera más de un voto del mismo usuario en la misma respuesta, se eliminan los sobrantes
             if (existentes.size() > 1) {
                 votoRepository.deleteAll(existentes.subList(1, existentes.size()));
             }

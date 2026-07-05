@@ -160,8 +160,6 @@ public class GeminiService {
 
         String soloLetras = limpio.toLowerCase().replaceAll("[^a-záéíóúñü]", "");
         long digitos = limpio.chars().filter(Character::isDigit).count();
-
-        // Contenido mayormente numérico/simbólico (operaciones, fórmulas): se acepta sin más análisis
         if (digitos >= 2 && soloLetras.length() <= limpio.length() / 2) {
             return true;
         }
@@ -172,18 +170,12 @@ public class GeminiService {
 
         long vocales = soloLetras.chars().filter(c -> VOCALES.indexOf(c) >= 0).count();
         double proporcionVocales = (double) vocales / soloLetras.length();
-
-        // Un texto real en español suele tener una proporción razonable de vocales
         if (proporcionVocales < 0.15) {
             return false;
         }
-
-        // Secuencias largas de la misma letra repetida (ej. "aaaaaa")
         if (limpio.matches(".*(.)\\1{3,}.*")) {
             return false;
         }
-
-        // Muchas consonantes seguidas suelen indicar texto aleatorio (teclado presionado al azar)
         int consecutivas = 0;
         int maxConsecutivas = 0;
         for (char c : soloLetras.toCharArray()) {
@@ -199,6 +191,35 @@ public class GeminiService {
     }
 
     public record ResultadoPregunta(boolean valida, String respuesta) {}
+
+    public boolean esRespuestaApropiada(String contextoPregunta, String respuesta) {
+        String prompt = """
+                Eres el moderador de contenido del foro educativo Learnia, donde estudiantes
+                responden dudas académicas de otros estudiantes.
+
+                Pregunta original: %s
+                Respuesta enviada por un estudiante: %s
+
+                Evalúa si la respuesta es apropiada para una comunidad educativa respetuosa:
+                no debe contener insultos, lenguaje discriminatorio u ofensivo, burlas hacia quien
+                pregunta, contenido de odio o sexual, ni ser spam o publicidad. NO hace falta que
+                sea la respuesta correcta o completa al tema: alcanza con que sea un aporte de
+                buena fe y respetuoso (aunque sea breve o poco útil).
+
+                Responde EXACTAMENTE una única palabra, sin nada más antes ni después:
+                APROPIADA
+                o
+                INAPROPIADA
+                """.formatted(contextoPregunta, respuesta);
+
+        String resultado = generarRespuesta(prompt, null);
+        String limpio = resultado == null ? "" : resultado.trim().toUpperCase();
+
+        if (limpio.startsWith("INAPROPIADA")) {
+            return false;
+        }
+        return true;
+    }
 
     public ResultadoPregunta evaluarPregunta(String titulo, String descripcion, String categoria) {
         String prompt = """
@@ -236,9 +257,6 @@ public class GeminiService {
             String textoRespuesta = limpio.substring(6).trim();
             return new ResultadoPregunta(true, textoRespuesta.isBlank() ? null : textoRespuesta);
         }
-
-        // Si no se pudo interpretar el formato (p. ej. error de la API o cuota agotada),
-        // se marca como pendiente de revisión en lugar de publicarla sin moderar
         return new ResultadoPregunta(false, null);
     }
 

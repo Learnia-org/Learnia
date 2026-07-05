@@ -1,6 +1,7 @@
 package com.proyecto.Learnia.service;
 
 import com.proyecto.Learnia.dto.PreguntaDTO;
+import com.proyecto.Learnia.dto.PreguntaSimilarDTO;
 import com.proyecto.Learnia.entity.Pregunta;
 import com.proyecto.Learnia.entity.Usuario;
 import com.proyecto.Learnia.entity.Categoria;
@@ -11,8 +12,11 @@ import com.proyecto.Learnia.repository.UsuarioRepository;
 import com.proyecto.Learnia.repository.CategoriaRepository;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PreguntaServiceImpl implements PreguntaService {
@@ -133,6 +137,85 @@ public class PreguntaServiceImpl implements PreguntaService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public List<PreguntaSimilarDTO> buscarSimilares(String texto, Long idCategoria) {
+        Set<String> palabrasTexto = tokenizar(texto);
+        if (palabrasTexto.isEmpty()) {
+            return List.of();
+        }
+
+        List<Pregunta> candidatas = idCategoria != null
+                ? preguntaRepository.findByCategoria_IdCategoriaAndOcultaFalse(idCategoria)
+                : preguntaRepository.findByOcultaFalse();
+
+        return candidatas.stream()
+                .map(p -> new Object[]{p, palabrasTexto, tokenizar(p.getTitulo() + " " + p.getDescripcion())})
+                .filter(par -> coincidenciaSuficiente((Set<String>) par[1], (Set<String>) par[2]))
+                .map(par -> new Object[]{par[0], similitudJaccard((Set<String>) par[1], (Set<String>) par[2])})
+                .filter(par -> ((double) par[1]) >= 0.3)
+                .sorted((a, b) -> Double.compare((double) b[1], (double) a[1]))
+                .limit(4)
+                .map(par -> {
+                    Pregunta p = (Pregunta) par[0];
+                    String categoria = p.getCategoria() != null ? p.getCategoria().getNombreCategoria() : "General";
+                    return new PreguntaSimilarDTO(p.getIdPregunta(), p.getTitulo(), categoria);
+                })
+                .toList();
+    }
+
+    private boolean coincidenciaSuficiente(Set<String> a, Set<String> b) {
+        Set<String> interseccion = new HashSet<>(a);
+        interseccion.retainAll(b);
+        if (interseccion.isEmpty()) {
+            return false;
+        }
+        if (interseccion.size() >= 2) {
+            return true;
+        }
+        return interseccion.stream().anyMatch(palabra -> palabra.length() >= 6);
+    }
+
+    private static final Set<String> STOPWORDS = Set.of(
+            "de", "la", "el", "en", "y", "a", "que", "los", "las", "un", "una", "con",
+            "para", "del", "es", "como", "por", "se", "su", "al", "lo", "mi", "tu", "cual",
+            "cuales", "porque", "cuando", "donde", "sobre", "entre", "esto", "esta", "este",
+            "quiero", "quisiera", "quisieramos", "aprender", "saber", "entender", "explicar",
+            "explicarme", "ayuda", "ayudenme", "necesito", "necesitamos", "gustaria", "puedo",
+            "podria", "podrian", "podrias", "hacer", "tener", "tengo", "tienen", "hay", "muy",
+            "bien", "bueno", "buena", "gusta", "cosas", "cosa", "algo", "nada", "todo", "toda",
+            "todos", "todas", "mas", "menos", "ese", "esa", "esos", "esas", "soy", "estoy",
+            "sera", "seria", "pueden", "alguien", "algun", "alguna", "dudas", "duda", "pregunta",
+            "tema", "temas", "manera", "forma"
+    );
+
+    private Set<String> tokenizar(String texto) {
+        if (texto == null || texto.isBlank()) {
+            return Set.of();
+        }
+        String limpio = Normalizer.normalize(texto.toLowerCase(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^a-z0-9\\s]", " ");
+
+        Set<String> resultado = new HashSet<>();
+        for (String palabra : limpio.split("\\s+")) {
+            if (palabra.length() >= 3 && !STOPWORDS.contains(palabra)) {
+                resultado.add(palabra);
+            }
+        }
+        return resultado;
+    }
+
+    private double similitudJaccard(Set<String> a, Set<String> b) {
+        if (a.isEmpty() || b.isEmpty()) {
+            return 0.0;
+        }
+        Set<String> interseccion = new HashSet<>(a);
+        interseccion.retainAll(b);
+        Set<String> union = new HashSet<>(a);
+        union.addAll(b);
+        return (double) interseccion.size() / union.size();
     }
 
     private Pregunta mapearYGuardar(Pregunta entidad, PreguntaDTO dto) {

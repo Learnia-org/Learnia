@@ -60,10 +60,8 @@ public class PlanEstudioServiceImpl implements PlanEstudioService {
         if (diasTotal < 1) {
             throw new IllegalArgumentException("La fecha del examen debe ser al menos mañana");
         }
-        int diasUtiles = (int) Math.min(diasTotal, 90); // límite razonable de planificación
+        int diasUtiles = (int) Math.min(diasTotal, 90);
 
-        // 1) Analiza el rendimiento del estudiante y toma los temas pendientes,
-        //    priorizando los que nunca vio y luego los que domina menos.
         RutaAprendizajeDTO ruta = rutaAprendizajeService.obtenerRuta(idUsuario, idCategoria);
         List<Recurso> pendientes = new ArrayList<>();
         ruta.getRecursos().forEach(r -> {
@@ -121,10 +119,6 @@ public class PlanEstudioServiceImpl implements PlanEstudioService {
         return dia;
     }
 
-    /**
-     * Reparte una lista de elementos en N "cubetas" (días) de la forma más
-     * pareja posible. Si hay más días que elementos, algunas cubetas quedan vacías.
-     */
     private <T> List<List<T>> distribuirEnBuckets(List<T> items, int buckets) {
         List<List<T>> resultado = new ArrayList<>();
         if (buckets <= 0) {

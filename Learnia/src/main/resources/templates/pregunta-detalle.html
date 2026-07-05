@@ -79,9 +79,13 @@
             </h1>
         </div>
         <div class="px-8 py-6">
-            <p class="text-slate-600 font-medium leading-relaxed text-base" th:text="${pregunta.descripcion}">
+            <p class="text-slate-600 font-medium leading-relaxed text-base" id="texto-pregunta" th:text="${pregunta.descripcion}">
                 Descripción de la pregunta...
             </p>
+            <button type="button" onclick="leerTexto('texto-pregunta', this)"
+                    class="lia-tts-btn mt-3 inline-flex items-center gap-2 text-[11px] font-black text-eduCian bg-eduCian/10 px-3 py-1.5 rounded-full uppercase hover:bg-eduCian hover:text-white transition-all">
+                <i class="fa-solid fa-volume-high"></i>Escuchar pregunta
+            </button>
             <div class="mt-4 flex items-center gap-2 text-xs text-slate-400 font-bold">
                 <i class="fa-solid fa-user-circle text-eduCian"></i>
                 <span th:text="${pregunta.usuario.nombreUsuario}">Autor</span>
@@ -162,9 +166,14 @@
                 </div>
             </div>
 
-            <p class="text-slate-600 font-medium leading-relaxed text-sm mb-4" th:text="${r.contenido}">
+            <p class="text-slate-600 font-medium leading-relaxed text-sm mb-2"
+               th:id="'texto-respuesta-' + ${r.idRespuesta}" th:text="${r.contenido}">
                 Contenido de la respuesta...
             </p>
+            <button type="button" th:onclick="|leerTexto('texto-respuesta-' + ${r.idRespuesta}, this)|"
+                    class="lia-tts-btn mb-4 inline-flex items-center gap-2 text-[11px] font-black text-slate-400 hover:text-eduCian transition-all">
+                <i class="fa-solid fa-volume-high"></i>Escuchar respuesta
+            </button>
 
             <div class="flex items-center gap-2 pt-4 border-t border-slate-100">
 
@@ -225,7 +234,6 @@
                 const data = await res.json().catch(() => ({}));
                 const msg  = data.message || ('Error ' + res.status);
                 mostrarToast(msg, 'error');
-                // Re-habilitar botones si hubo error
                 if (btnLike)    btnLike.disabled    = false;
                 if (btnDislike) btnDislike.disabled = false;
             }
@@ -244,8 +252,32 @@
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3500);
     }
+
+    let botonHablando = null;
+    function leerTexto(idElemento, btn) {
+        const synth = window.speechSynthesis;
+        if (!synth) return;
+
+        if (synth.speaking) {
+            synth.cancel();
+            if (botonHablando) botonHablando.classList.remove('text-eduCian');
+            if (botonHablando === btn) { botonHablando = null; return; }
+        }
+
+        const texto = document.getElementById(idElemento)?.textContent?.trim();
+        if (!texto) return;
+
+        const utter = new SpeechSynthesisUtterance(texto);
+        utter.lang = 'es-ES';
+        utter.rate = 1;
+        botonHablando = btn;
+        btn.classList.add('text-eduCian');
+        utter.onend = () => { btn.classList.remove('text-eduCian'); botonHablando = null; };
+        synth.speak(utter);
+    }
 </script>
 
     <div th:replace="~{fragments/chatbot :: chatbot}"></div>
+    <div th:replace="~{fragments/darkmode :: darkmode}"></div>
 </body>
 </html>

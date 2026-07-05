@@ -33,7 +33,7 @@ public class MensajeController {
         Usuario usuario = usuarioRepository.findByCorreoUsuario(userDetails.getUsername()).orElseThrow();
 
         List<ConversacionDTO> conversaciones = mensajeService.listarConversaciones(usuario.getIdUsuario());
-        Usuario asistente = usuarioRepository.findByEsBotTrue().orElse(null);
+        Usuario asistente = usuarioRepository.findByEsBotTrue().stream().findFirst().orElse(null);
 
         model.addAttribute("usuario", usuario);
         model.addAttribute("asistente", asistente);

@@ -142,6 +142,26 @@
         #lia-chat-send:disabled { background: #cbd5e1; cursor: not-allowed; }
         #lia-chat-send svg { width: 16px; height: 16px; fill: #fff; }
 
+        #lia-chat-mic {
+            width: 38px; height: 38px; border-radius: 50%; border: none;
+            background: #eef2f7; color: #2C3E50; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.15s ease; font-size: 15px;
+        }
+        #lia-chat-mic:hover { background: #e2e8f0; }
+        #lia-chat-mic.lia-recording { background: #D35400; color: #fff; animation: liaPulseMic 1s infinite; }
+        @keyframes liaPulseMic { 0%,100% { box-shadow: 0 0 0 0 rgba(211,84,0,0.5); } 50% { box-shadow: 0 0 0 8px rgba(211,84,0,0); } }
+
+        .lia-speak-btn {
+            border: none; background: transparent; cursor: pointer; opacity: 0.55;
+            font-size: 11.5px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;
+            padding: 0; color: inherit;
+        }
+        .lia-speak-btn:hover { opacity: 1; }
+        .lia-msg-wrap { display: flex; flex-direction: column; max-width: 82%; }
+        .lia-msg-wrap.lia-wrap-user { align-self: flex-end; align-items: flex-end; }
+        .lia-msg-wrap.lia-wrap-bot { align-self: flex-start; align-items: flex-start; }
+
         @media (max-width: 480px) {
             #lia-chat-panel { right: 12px; left: 12px; width: auto; bottom: 84px; }
             #lia-chat-root { right: 12px; bottom: 12px; }
@@ -173,6 +193,9 @@
             <div id="lia-chat-messages"></div>
 
             <div id="lia-chat-inputbar">
+                <button type="button" id="lia-chat-mic" title="Preguntar por voz">
+                    <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg>
+                </button>
                 <textarea id="lia-chat-input" rows="1" placeholder="Escribe tu pregunta..."></textarea>
                 <button type="button" id="lia-chat-send" title="Enviar">
                     <svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2v7Z"/></svg>
@@ -185,10 +208,13 @@
         </button>
     </div>
 
+    <script th:inline="javascript">
+        var LIA_USER_KEY = /*[[${chatUsuarioKey}]]*/ 'anon';
+    </script>
     <script th:inline="none">
     (function () {
-        var STORAGE_KEY = 'lia_chat_history_v1';
-        var OPEN_KEY = 'lia_chat_open_v1';
+        var STORAGE_KEY = 'lia_chat_history_v1_' + (window.LIA_USER_KEY || 'anon');
+        var OPEN_KEY = 'lia_chat_open_v1_' + (window.LIA_USER_KEY || 'anon');
 
         var panel = document.getElementById('lia-chat-panel');
         var toggleBtn = document.getElementById('lia-chat-toggle');
@@ -208,12 +234,44 @@
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(history));
         }
 
+        var synth = window.speechSynthesis;
+        var vozSoportada = !!synth;
+
+        function leerEnVozAlta(texto, btn) {
+            if (!vozSoportada) return;
+            if (synth.speaking) {
+                synth.cancel();
+                return;
+            }
+            var utter = new SpeechSynthesisUtterance(texto);
+            utter.lang = 'es-ES';
+            utter.rate = 1;
+            synth.speak(utter);
+        }
+
         function renderMessage(role, texto, isError) {
+            var wrap = document.createElement('div');
+            wrap.className = 'lia-msg-wrap ' + (role === 'user' ? 'lia-wrap-user' : 'lia-wrap-bot');
+
             var div = document.createElement('div');
             div.className = 'lia-msg ' + (role === 'user' ? 'lia-msg-user' : 'lia-msg-bot');
             if (isError) div.className += ' lia-msg-error';
             div.textContent = texto;
-            messagesBox.appendChild(div);
+            wrap.appendChild(div);
+
+            if (role !== 'user' && vozSoportada && !isError) {
+                var speakBtn = document.createElement('button');
+                speakBtn.type = 'button';
+                speakBtn.className = 'lia-speak-btn';
+                speakBtn.title = 'Escuchar respuesta';
+                speakBtn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3Zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12Z"/></svg><span>Escuchar</span>';
+                speakBtn.addEventListener('click', function () {
+                    leerEnVozAlta(texto, speakBtn);
+                });
+                wrap.appendChild(speakBtn);
+            }
+
+            messagesBox.appendChild(wrap);
             messagesBox.scrollTop = messagesBox.scrollHeight;
         }
 
@@ -325,6 +383,52 @@
         renderAll();
         if (sessionStorage.getItem(OPEN_KEY) === '1') {
             openPanel();
+        }
+
+        var micBtn = document.getElementById('lia-chat-mic');
+        var SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognitionImpl) {
+            if (micBtn) micBtn.style.display = 'none';
+        } else if (micBtn) {
+            var recognizer = new SpeechRecognitionImpl();
+            recognizer.lang = 'es-ES';
+            recognizer.interimResults = false;
+            recognizer.maxAlternatives = 1;
+            var escuchando = false;
+
+            recognizer.onresult = function (event) {
+                var texto = event.results[0][0].transcript;
+                input.value = (input.value ? input.value + ' ' : '') + texto;
+                input.dispatchEvent(new Event('input'));
+                input.focus();
+            };
+
+            recognizer.onend = function () {
+                escuchando = false;
+                micBtn.classList.remove('lia-recording');
+            };
+
+            recognizer.onerror = function () {
+                escuchando = false;
+                micBtn.classList.remove('lia-recording');
+            };
+
+            micBtn.addEventListener('click', function () {
+                if (escuchando) {
+                    recognizer.stop();
+                    return;
+                }
+                try {
+                    if (synth && synth.speaking) synth.cancel();
+                    escuchando = true;
+                    micBtn.classList.add('lia-recording');
+                    recognizer.start();
+                } catch (e) {
+                    escuchando = false;
+                    micBtn.classList.remove('lia-recording');
+                }
+            });
         }
     })();
     </script>

@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidRole(IllegalArgumentException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", "Validación de Enum fallida");
-        response.put("mensaje", ex.getMessage()); // Aquí saldrá tu mensaje personalizado
+        response.put("mensaje", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

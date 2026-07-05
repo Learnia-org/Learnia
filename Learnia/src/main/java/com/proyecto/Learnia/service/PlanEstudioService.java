@@ -10,11 +10,6 @@ import java.util.List;
 
 public interface PlanEstudioService {
 
-    /**
-     * Genera automáticamente un plan de estudio para prepararse a un examen:
-     * toma los temas pendientes de la categoría, los reparte por día hasta
-     * la fecha del examen y reserva el último día para repaso final.
-     */
     PlanEstudio generarPlan(Long idUsuario, Long idCategoria, LocalDate fechaExamen, String titulo);
 
     List<PlanEstudioResumenDTO> obtenerPlanesUsuario(Long idUsuario);
@@ -27,9 +22,5 @@ public interface PlanEstudioService {
 
     void eliminarPlan(Long idPlan, Long idUsuario);
 
-    /**
-     * Recordatorios de tareas de hoy/atrasadas y exámenes próximos, para
-     * mostrar como aviso dentro de la plataforma.
-     */
     List<RecordatorioDTO> obtenerRecordatorios(Long idUsuario);
 }

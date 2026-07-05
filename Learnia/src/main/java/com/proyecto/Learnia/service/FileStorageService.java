@@ -16,10 +16,6 @@ public class FileStorageService {
     @Value("${app.upload.dir}")
     private String uploadDir;
 
-    /**
-     * Guarda una imagen de perfil en {uploadDir}/perfiles y devuelve la ruta
-     * pública ("/uploads/perfiles/archivo.jpg") para guardar en la base de datos.
-     */
     public String guardarFotoPerfil(MultipartFile archivo) throws IOException {
         if (archivo == null || archivo.isEmpty()) return null;
 

@@ -72,8 +72,21 @@ public class RespuestaServiceImpl implements RespuestaService {
         respuesta.setFechaRespuesta(LocalDateTime.now());
         respuesta.setPregunta(pregunta);
         respuesta.setUsuario(usuario);
-        respuesta.setOculta(geminiService.contieneContenidoProhibido(contenido)
-                || !geminiService.esContenidoCoherente(contenido));
+
+        boolean pasaFiltrosLocales = !geminiService.contieneContenidoProhibido(contenido)
+                && geminiService.esContenidoCoherente(contenido);
+
+        boolean apropiada = pasaFiltrosLocales;
+        if (apropiada) {
+            try {
+                String contextoPregunta = pregunta.getTitulo() + ". " + pregunta.getDescripcion();
+                apropiada = geminiService.esRespuestaApropiada(contextoPregunta, contenido);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        respuesta.setOculta(!apropiada);
 
         return respuestaRepository.save(respuesta);
     }
@@ -99,17 +112,25 @@ public class RespuestaServiceImpl implements RespuestaService {
     }
 
     private Usuario obtenerOCrearUsuarioIA() {
-        return usuarioRepository.findByCorreoUsuario(IA_CORREO)
+        Usuario usuarioIA = usuarioRepository.findByCorreoUsuario(IA_CORREO)
                 .orElseGet(() -> {
-                    Usuario usuarioIA = new Usuario();
-                    usuarioIA.setNombreUsuario(IA_NOMBRE);
-                    usuarioIA.setCorreoUsuario(IA_CORREO);
-                    usuarioIA.setContrasenaUsuario(passwordEncoder.encode(UUID.randomUUID().toString()));
-                    usuarioIA.setFechaRegistro(LocalDateTime.now());
-                    usuarioIA.setRolUsuario(RolUsuario.ESTUDIANTE);
-                    usuarioIA.setBloqueado(true);
-                    return usuarioRepository.save(usuarioIA);
+                    Usuario nuevo = new Usuario();
+                    nuevo.setNombreUsuario(IA_NOMBRE);
+                    nuevo.setCorreoUsuario(IA_CORREO);
+                    nuevo.setContrasenaUsuario(passwordEncoder.encode(UUID.randomUUID().toString()));
+                    nuevo.setFechaRegistro(LocalDateTime.now());
+                    nuevo.setRolUsuario(RolUsuario.ESTUDIANTE);
+                    nuevo.setBloqueado(true);
+                    nuevo.setEsBot(true);
+                    return usuarioRepository.save(nuevo);
                 });
+
+        if (!usuarioIA.isEsBot()) {
+            usuarioIA.setEsBot(true);
+            usuarioIA = usuarioRepository.save(usuarioIA);
+        }
+
+        return usuarioIA;
     }
 
     @Override

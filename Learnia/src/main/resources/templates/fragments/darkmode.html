@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="darkmode">
+
+    <style>
+        html.dark { color-scheme: dark; }
+        html.dark body { background: #0f172a !important; color: #e2e8f0 !important; }
+        html.dark .bg-white { background-color: #1e293b !important; }
+        html.dark .bg-slate-50, html.dark .bg-gray-50, html.dark .bg-slate-100,
+        html.dark .bg-softGray { background-color: #0b1220 !important; }
+        html.dark .bg-eduCian\/10 { background-color: rgba(41,128,185,0.18) !important; }
+        html.dark .bg-natureGreen\/10 { background-color: rgba(39,174,96,0.18) !important; }
+        html.dark .bg-terracota\/10 { background-color: rgba(211,84,0,0.18) !important; }
+        html.dark .bg-solarYellow\/10 { background-color: rgba(241,196,15,0.14) !important; }
+        html.dark .glass-card { background: rgba(30,41,59,0.85) !important; border-color: rgba(255,255,255,0.08) !important; }
+        html.dark .text-deepBlue { color: #e2e8f0 !important; }
+        html.dark .text-slate-600, html.dark .text-slate-500, html.dark .text-gray-500,
+        html.dark .text-gray-600 { color: #cbd5e1 !important; }
+        html.dark .text-slate-400, html.dark .text-gray-400 { color: #94a3b8 !important; }
+        html.dark .border-slate-100, html.dark .border-slate-200, html.dark .border-gray-100,
+        html.dark .border-gray-200, html.dark .border-white\/10, html.dark .border-slate-50 { border-color: #334155 !important; }
+        html.dark nav { background-color: rgba(15,23,42,0.92) !important; }
+        html.dark input, html.dark textarea, html.dark select {
+            background-color: #1e293b !important; color: #e2e8f0 !important; border-color: #334155 !important;
+        }
+        html.dark input::placeholder, html.dark textarea::placeholder { color: #64748b !important; }
+        html.dark .shadow-sm, html.dark .shadow-md, html.dark .shadow-lg, html.dark .shadow-xl, html.dark .shadow-2xl {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35) !important;
+        }
+        html.dark ::-webkit-scrollbar-track { background: #0f172a; }
+
+        html.dark [class*="bg-white"] { background-color: #1e293b !important; }
+        html.dark [class*="bg-slate-50"], html.dark [class*="bg-gray-50"],
+        html.dark [class*="bg-slate-100"], html.dark [class*="bg-gray-100"],
+        html.dark [class*="bg-gray-200"] { background-color: #0b1220 !important; }
+        html.dark [class*="text-deepBlue"] { color: #e2e8f0 !important; }
+        html.dark [class*="border-slate"], html.dark [class*="border-gray"],
+        html.dark [class*="border-white"] { border-color: #334155 !important; }
+        html.dark .hero-gradient { background: radial-gradient(circle at top right, #111827, #0f172a) !important; }
+        html.dark .tarjeta { background: #1e293b !important; border-color: #334155 !important; }
+        html.dark .logo-texto { color: #7dd3fc !important; }
+        html.dark .titulo { color: #e2e8f0 !important; }
+        html.dark .subtitulo, html.dark .pie { color: #94a3b8 !important; }
+        html.dark .pie { border-color: #334155 !important; }
+        html.dark .campo label { color: #e2e8f0 !important; }
+        html.dark .campo input {
+            background: #0f172a !important; border-color: #334155 !important; color: #e2e8f0 !important;
+        }
+        html.dark .campo input:focus { background: #1e293b !important; }
+        html.dark .campo input[type="file"] { background: transparent !important; }
+        html.dark .divisor { color: #64748b !important; }
+        html.dark .divisor::before, html.dark .divisor::after { border-color: #334155 !important; }
+        html.dark .boton-registro { border-color: #334155 !important; color: #cbd5e1 !important; }
+        html.dark .boton-registro:hover { background: #0f172a !important; }
+        html.dark .mensaje.error, html.dark .mensaje-error {
+            background: rgba(225,29,72,0.15) !important; border-color: rgba(225,29,72,0.35) !important;
+        }
+        html.dark .mensaje.exito {
+            background: rgba(22,101,52,0.25) !important; border-color: rgba(34,197,94,0.35) !important;
+        }
+        html.dark .curso-link { background: #1e293b !important; color: #cbd5e1 !important; border-color: #334155 !important; }
+        html.dark #lia-chat-panel { background: #0f172a !important; border-color: #334155 !important; }
+        html.dark #lia-chat-messages { background: #0b1220 !important; }
+        html.dark .lia-msg-bot { background: #1e293b !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        html.dark .lia-msg-user { background: #2980B9 !important; color: #ffffff !important; }
+        html.dark .lia-msg-error { background: rgba(185,28,28,0.2) !important; color: #fca5a5 !important; border-color: rgba(185,28,28,0.4) !important; }
+        html.dark .lia-typing { background: #1e293b !important; border-color: #334155 !important; }
+        html.dark #lia-chat-inputbar { background: #0f172a !important; border-color: #334155 !important; }
+        html.dark #lia-chat-input { background: #1e293b !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        html.dark #lia-chat-input::placeholder { color: #64748b !important; }
+        html.dark #lia-chat-mic { background: #1e293b !important; color: #cbd5e1 !important; }
+        html.dark #lia-chat-mic:hover { background: #263449 !important; }
+
+        #lia-dark-toggle {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            z-index: 999998;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: #2C3E50;
+            color: #F1C40F;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: transform 0.2s ease;
+        }
+        #lia-dark-toggle:hover { transform: scale(1.08); }
+        html.dark #lia-dark-toggle { background: #F1C40F; color: #2C3E50; }
+
+        @media (max-width: 480px) {
+            #lia-dark-toggle { left: 12px; bottom: 12px; }
+        }
+    </style>
+
+    <button type="button" id="lia-dark-toggle" title="Cambiar tema claro/oscuro">
+        <i class="fa-solid fa-moon" id="lia-dark-icon"></i>
+    </button>
+
+    <script th:inline="none">
+    (function () {
+        var THEME_KEY = 'lia_theme_v1';
+        var toggle = document.getElementById('lia-dark-toggle');
+        var icon = document.getElementById('lia-dark-icon');
+
+        function aplicarTema(oscuro) {
+            document.documentElement.classList.toggle('dark', oscuro);
+            if (icon) {
+                icon.className = oscuro ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            }
+        }
+
+        var guardado = localStorage.getItem(THEME_KEY);
+        aplicarTema(guardado === 'dark');
+
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                var oscuroAhora = !document.documentElement.classList.contains('dark');
+                aplicarTema(oscuroAhora);
+                localStorage.setItem(THEME_KEY, oscuroAhora ? 'dark' : 'light');
+            });
+        }
+    })();
+    </script>
+</div>
+
+</body>
+</html>

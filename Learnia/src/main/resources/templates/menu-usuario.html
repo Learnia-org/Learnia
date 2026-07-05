@@ -25,6 +25,16 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         #categorias-dropdown { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
         #categorias-dropdown.open { max-height: 500px; }
+
+        .curso-link { background: #ffffff; transition: background 0.2s ease, color 0.2s ease; }
+        .curso-link:hover { color: #ffffff; }
+        .curso-link-mate:hover { background: linear-gradient(to right, #7c3aed, #8b5cf6); }
+        .curso-link-fisica:hover { background: linear-gradient(to right, #0284c7, #38bdf8); }
+        .curso-link-ingles:hover { background: linear-gradient(to right, #d97706, #f59e0b); }
+        .curso-link-prog:hover { background: linear-gradient(to right, #059669, #10b981); }
+        .curso-link-ruta:hover { background: linear-gradient(to right, #27AE60, #2ecc71); }
+        .curso-link-plan:hover { background: linear-gradient(to right, #D35400, #e67e22); }
+        .curso-link-ranking:hover { background: linear-gradient(to right, #F1C40F, #f5d76e); }
     </style>
 </head>
 <body class="font-sans text-deepBlue antialiased">
@@ -72,37 +82,25 @@
             <div class="flex lg:flex-col gap-2 overflow-x-auto pb-2 no-scrollbar">
 
                 <a th:href="@{/materias/matematica}"
-                   class="w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 hover:text-white transition-all border border-slate-200 hover:border-transparent hover:shadow-md"
-                   style="background: white;"
-                   onmouseover="this.style.background='linear-gradient(to right,#7c3aed,#8b5cf6)'; this.style.color='white';"
-                   onmouseout="this.style.background='white'; this.style.color='';">
+                   class="curso-link curso-link-mate w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md">
                     <i class="fa-solid fa-calculator text-indigo-500 text-sm w-4"></i>
                     <span class="text-sm font-bold">Matemática</span>
                 </a>
 
                 <a th:href="@{/materias/fisica}"
-                   class="w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md"
-                   style="background: white;"
-                   onmouseover="this.style.background='linear-gradient(to right,#0284c7,#38bdf8)'; this.style.color='white';"
-                   onmouseout="this.style.background='white'; this.style.color='';">
+                   class="curso-link curso-link-fisica w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md">
                     <i class="fa-solid fa-atom text-sky-500 text-sm w-4"></i>
                     <span class="text-sm font-bold">Física</span>
                 </a>
 
                 <a th:href="@{/materias/ingles}"
-                   class="w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md"
-                   style="background: white;"
-                   onmouseover="this.style.background='linear-gradient(to right,#d97706,#f59e0b)'; this.style.color='white';"
-                   onmouseout="this.style.background='white'; this.style.color='';">
+                   class="curso-link curso-link-ingles w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md">
                     <i class="fa-solid fa-language text-amber-500 text-sm w-4"></i>
                     <span class="text-sm font-bold">Inglés</span>
                 </a>
 
                 <a th:href="@{/materias/informatica}"
-                   class="w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md"
-                   style="background: white;"
-                   onmouseover="this.style.background='linear-gradient(to right,#059669,#10b981)'; this.style.color='white';"
-                   onmouseout="this.style.background='white'; this.style.color='';">
+                   class="curso-link curso-link-prog w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md">
                     <i class="fa-solid fa-terminal text-emerald-500 text-sm w-4"></i>
                     <span class="text-sm font-bold">Programación</span>
                 </a>
@@ -115,21 +113,28 @@
             <div class="flex lg:flex-col gap-2 overflow-x-auto pb-2 no-scrollbar">
 
                 <a th:href="@{/ruta-aprendizaje}"
-                   class="w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md"
-                   style="background: white;"
-                   onmouseover="this.style.background='linear-gradient(to right,#27AE60,#2ecc71)'; this.style.color='white';"
-                   onmouseout="this.style.background='white'; this.style.color='';">
+                   class="curso-link curso-link-ruta w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md">
                     <i class="fa-solid fa-route text-natureGreen text-sm w-4"></i>
                     <span class="text-sm font-bold">Ruta de Aprendizaje</span>
                 </a>
 
                 <a th:href="@{/plan-estudio}"
-                   class="w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md"
-                   style="background: white;"
-                   onmouseover="this.style.background='linear-gradient(to right,#D35400,#e67e22)'; this.style.color='white';"
-                   onmouseout="this.style.background='white'; this.style.color='';">
+                   class="curso-link curso-link-plan w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md">
                     <i class="fa-solid fa-calendar-check text-terracota text-sm w-4"></i>
                     <span class="text-sm font-bold">Plan de Estudio</span>
+                </a>
+
+            </div>
+        </div>
+
+        <div class="pt-2">
+            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest pl-2 mb-3">Comunidad</h2>
+            <div class="flex lg:flex-col gap-2 overflow-x-auto pb-2 no-scrollbar">
+
+                <a th:href="@{/ranking-mentores}"
+                   class="curso-link curso-link-ranking w-full flex items-center space-x-3 p-3 px-5 rounded-2xl text-slate-600 transition-all border border-slate-200 hover:border-transparent hover:shadow-md">
+                    <i class="fa-solid fa-trophy text-solarYellow text-sm w-4"></i>
+                    <span class="text-sm font-bold">Top Mentores</span>
                 </a>
 
             </div>
@@ -448,5 +453,6 @@
     setInterval(actualizarBadgeMensajes, 8000);
 </script>
 <div th:replace="~{fragments/chatbot :: chatbot}"></div>
+<div th:replace="~{fragments/darkmode :: darkmode}"></div>
 </body>
 </html>

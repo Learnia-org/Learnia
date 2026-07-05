@@ -54,7 +54,7 @@
     </div>
     <div class="flex items-center space-x-10 text-[12px] font-bold tracking-widest uppercase">
         <a th:href="@{/login}" class="text-deepBlue/70 hover:text-eduCian transition-colors">Iniciar Sesión</a>
-        <a th:href="@{/registro}" class="bg-deepBlue text-white px-8 py-4 rounded-full hover:bg-eduCian transition-all shadow-lg hover:shadow-eduCian/30 active:scale-95">Registrarse</a>
+        <a th:href="@{/register}" class="bg-deepBlue text-white px-8 py-4 rounded-full hover:bg-eduCian transition-all shadow-lg hover:shadow-eduCian/30 active:scale-95">Registrarse</a>
     </div>
 </nav>
 
@@ -63,12 +63,18 @@
         <div class="space-y-10">
             <div class="inline-flex items-center space-x-2 px-5 py-2 bg-white rounded-full shadow-md text-eduCian text-[10px] font-black uppercase tracking-widest border border-gray-50">
                 <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-natureGreen opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-natureGreen"></span></span>
-                <span>Comunidad Activa 2026</span>
+                <span><span id="contador-en-linea" th:text="${estudiantesConectados}">0</span> estudiantes conectados ahora</span>
             </div>
             <h1 class="text-7xl lg:text-8xl font-black leading-[1.1] tracking-tight">De la curiosidad al <span class="animated-gradient-text italic">conocimiento</span></h1>
             <p class="text-2xl text-gray-500 font-medium max-w-lg leading-relaxed">La red de aprendizaje colaborativo donde estudiantes y expertos resuelven retos juntos.</p>
             <div class="flex items-center space-x-12">
-                <div><div class="text-4xl font-black text-deepBlue">🎓</div><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estudiantes</div></div>
+                <div>
+                    <div class="text-4xl font-black text-natureGreen flex items-center gap-2">
+                        <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-natureGreen opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-natureGreen"></span></span>
+                        <span id="contador-en-linea-2" th:text="${estudiantesConectados}">0</span>
+                    </div>
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">En línea ahora</div>
+                </div>
                 <div class="w-px h-10 bg-gray-200"></div>
                 <div><div class="text-4xl font-black text-eduCian">📚</div><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Categorias</div></div>
             </div>
@@ -290,6 +296,20 @@
         btn.appendChild(p);
         setTimeout(() => p.remove(), 800);
     }
+
+    function actualizarContadorEnLinea() {
+        fetch('/api/public/estado-comunidad')
+            .then(r => r.json())
+            .then(data => {
+                const a = document.getElementById('contador-en-linea');
+                const b = document.getElementById('contador-en-linea-2');
+                if (a) a.textContent = data.enLinea;
+                if (b) b.textContent = data.enLinea;
+            })
+            .catch(() => {});
+    }
+    setInterval(actualizarContadorEnLinea, 10000);
 </script>
+<div th:replace="~{fragments/darkmode :: darkmode}"></div>
 </body>
 </html>

@@ -170,7 +170,6 @@
                     <div class="absolute -right-10 -top-10 w-32 h-32 bg-eduCian/20 rounded-full blur-3xl"></div>
                 </div>
 
-                <!-- Tu Impacto - tiempo real -->
                 <div class="glass-card p-8 rounded-[2.5rem] shadow-xl">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-black uppercase tracking-wider text-slate-400">Tu Impacto</h3>
@@ -190,6 +189,35 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="glass-card p-8 rounded-[2.5rem] shadow-xl">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-slate-400 mb-4">Tus Insignias</h3>
+
+                    <div th:if="${#lists.isEmpty(insignias)}" class="text-center py-6">
+                        <i class="fa-solid fa-medal text-3xl text-slate-200 mb-2"></i>
+                        <p class="text-xs text-slate-400 font-bold">Aún no tienes insignias. ¡Participa en la comunidad para desbloquearlas!</p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(insignias)}" class="grid grid-cols-1 gap-3">
+                        <div th:each="insignia : ${insignias}"
+                             class="flex items-center gap-3 p-3 rounded-2xl border"
+                             th:classappend="'bg-' + ${insignia.color} + '/5 border-' + ${insignia.color} + '/20'">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
+                                 th:classappend="'bg-' + ${insignia.color}">
+                                <i th:class="'fa-solid ' + ${insignia.icono}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-black text-deepBlue truncate" th:text="${insignia.nombre}">Insignia</p>
+                                <p class="text-[10px] text-slate-400 font-bold truncate" th:text="${insignia.detalle}">Detalle</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a th:href="@{/ranking-mentores}"
+                   class="block text-center bg-deepBlue text-white py-3 rounded-2xl font-bold text-xs hover:bg-eduCian transition-all shadow-md">
+                    <i class="fa-solid fa-trophy mr-2 text-solarYellow"></i>Ver Top Mentores
+                </a>
             </div>
         </form>
     </main>
@@ -219,7 +247,6 @@
         }
     });
 
-    // Impacto en tiempo real
     function actualizarImpacto() {
         fetch('/api/mi-impacto')
             .then(r => r.json())
@@ -232,5 +259,6 @@
     setInterval(actualizarImpacto, 8000);
 </script>
     <div th:replace="~{fragments/chatbot :: chatbot}"></div>
+    <div th:replace="~{fragments/darkmode :: darkmode}"></div>
 </body>
 </html>

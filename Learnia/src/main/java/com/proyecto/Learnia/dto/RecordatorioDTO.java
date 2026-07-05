@@ -9,6 +9,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RecordatorioDTO {
     private String mensaje;
-    private String tipo; // "hoy", "atrasado" o "examen"
+    private String tipo;
     private Long idPlan;
 }

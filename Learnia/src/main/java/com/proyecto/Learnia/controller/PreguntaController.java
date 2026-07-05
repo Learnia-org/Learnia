@@ -1,6 +1,7 @@
 package com.proyecto.Learnia.controller;
 
 import com.proyecto.Learnia.dto.PreguntaDTO;
+import com.proyecto.Learnia.dto.PreguntaSimilarDTO;
 import com.proyecto.Learnia.entity.Pregunta;
 import com.proyecto.Learnia.service.PreguntaService;
 import jakarta.validation.Valid;
@@ -20,19 +21,22 @@ public class PreguntaController {
         this.preguntaService = preguntaService;
     }
 
-    // LISTAR TODO: GET http://localhost:8080/api/preguntas
     @GetMapping
     public List<Pregunta> listar() {
         return preguntaService.listar();
     }
 
-    // GUARDAR: POST http://localhost:8080/api/preguntas
     @PostMapping
     public ResponseEntity<Pregunta> guardar(@Valid @RequestBody PreguntaDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(preguntaService.guardar(dto));
     }
 
-    // BUSCAR: GET http://localhost:8080/api/preguntas/{id}
+    @GetMapping("/similares")
+    public List<PreguntaSimilarDTO> similares(@RequestParam String texto,
+                                              @RequestParam(required = false) Long idCategoria) {
+        return preguntaService.buscarSimilares(texto, idCategoria);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Pregunta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(preguntaService.buscarPorId(id));
