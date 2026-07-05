@@ -12,7 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -28,19 +30,22 @@ public class RespuestaServiceImpl implements RespuestaService {
     private final PreguntaRepository preguntaRepository;
     private final PasswordEncoder passwordEncoder;
     private final GeminiService geminiService;
+    private final FileStorageService fileStorageService;
 
     public RespuestaServiceImpl(
             RespuestaRepository respuestaRepository,
             UsuarioRepository usuarioRepository,
             PreguntaRepository preguntaRepository,
             PasswordEncoder passwordEncoder,
-            GeminiService geminiService) {
+            GeminiService geminiService,
+            FileStorageService fileStorageService) {
 
         this.respuestaRepository = respuestaRepository;
         this.usuarioRepository = usuarioRepository;
         this.preguntaRepository = preguntaRepository;
         this.passwordEncoder = passwordEncoder;
         this.geminiService = geminiService;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
@@ -49,6 +54,11 @@ public class RespuestaServiceImpl implements RespuestaService {
     }
 
     public Respuesta guardar(Long preguntaId, String contenido) {
+        return guardar(preguntaId, contenido, (MultipartFile) null);
+    }
+
+    @Override
+    public Respuesta guardar(Long preguntaId, String contenido, MultipartFile imagen) {
 
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
                 .orElseThrow(() ->
@@ -72,6 +82,14 @@ public class RespuestaServiceImpl implements RespuestaService {
         respuesta.setFechaRespuesta(LocalDateTime.now());
         respuesta.setPregunta(pregunta);
         respuesta.setUsuario(usuario);
+
+        if (imagen != null && !imagen.isEmpty()) {
+            try {
+                respuesta.setImagenUrl(fileStorageService.guardarImagenRespuesta(imagen));
+            } catch (IOException e) {
+                throw new RuntimeException("No se pudo guardar la imagen adjunta", e);
+            }
+        }
 
         boolean pasaFiltrosLocales = !geminiService.contieneContenidoProhibido(contenido)
                 && geminiService.esContenidoCoherente(contenido);

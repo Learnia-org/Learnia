@@ -16,4 +16,5 @@ public class PreguntaDTO {
     private Long idUsuario;
     @NotNull(message = "Selecciona una categoría")
     private Long idCategoria;
+    private String imagenUrl;
 }

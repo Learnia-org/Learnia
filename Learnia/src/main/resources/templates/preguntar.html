@@ -48,7 +48,7 @@
              th:text="${error}">
         </div>
 
-        <form th:action="@{/preguntar}" th:object="${preguntaDTO}" method="post" class="space-y-6">
+        <form th:action="@{/preguntar}" th:object="${preguntaDTO}" method="post" enctype="multipart/form-data" class="space-y-6">
 
             <div>
                 <label class="text-sm font-bold">Título <span class="text-red-400">*</span></label>
@@ -94,6 +94,25 @@
                             th:text="${cat.nombreCategoria}">
                     </option>
                 </select>
+            </div>
+
+            <div>
+                <label class="text-sm font-bold">Imagen (opcional)</label>
+                <div class="mt-2">
+                    <label for="input-imagen"
+                           class="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl p-4 text-sm font-bold text-gray-400 hover:border-eduCian hover:text-eduCian cursor-pointer transition-colors">
+                        <i class="fa-solid fa-image"></i>
+                        <span id="imagen-label-text">Adjuntar una imagen para ilustrar tu pregunta</span>
+                    </label>
+                    <input type="file" id="input-imagen" name="imagenFile" accept="image/*" class="hidden">
+                    <div id="imagen-preview-wrap" class="hidden mt-3 relative inline-block">
+                        <img id="imagen-preview" class="max-h-48 rounded-xl border border-gray-200 object-contain" alt="Vista previa">
+                        <button type="button" id="imagen-quitar"
+                                class="absolute -top-2 -right-2 w-6 h-6 bg-terracota text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -149,6 +168,34 @@
 
     habilitarDictado('mic-titulo', 'input-titulo');
     habilitarDictado('mic-descripcion', 'input-descripcion');
+
+    const inputImagen = document.getElementById('input-imagen');
+    const previewWrap = document.getElementById('imagen-preview-wrap');
+    const previewImg = document.getElementById('imagen-preview');
+    const imagenLabelText = document.getElementById('imagen-label-text');
+    const btnQuitarImagen = document.getElementById('imagen-quitar');
+
+    inputImagen.addEventListener('change', () => {
+        const archivo = inputImagen.files && inputImagen.files[0];
+        if (!archivo) {
+            previewWrap.classList.add('hidden');
+            imagenLabelText.textContent = 'Adjuntar una imagen para ilustrar tu pregunta';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewWrap.classList.remove('hidden');
+            imagenLabelText.textContent = archivo.name;
+        };
+        reader.readAsDataURL(archivo);
+    });
+
+    btnQuitarImagen.addEventListener('click', () => {
+        inputImagen.value = '';
+        previewWrap.classList.add('hidden');
+        imagenLabelText.textContent = 'Adjuntar una imagen para ilustrar tu pregunta';
+    });
 
     let debounceTimer = null;
     const descripcionEl = document.getElementById('input-descripcion');

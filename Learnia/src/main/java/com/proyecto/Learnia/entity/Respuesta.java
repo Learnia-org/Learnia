@@ -43,4 +43,7 @@ public class Respuesta {
     @Column(name = "oculta", columnDefinition = "boolean default false")
     private boolean oculta = false;
 
+    @Column(name = "imagen_url", length = 255)
+    private String imagenUrl;
+
 }

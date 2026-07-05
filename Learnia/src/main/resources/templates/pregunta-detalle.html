@@ -82,6 +82,12 @@
             <p class="text-slate-600 font-medium leading-relaxed text-base" id="texto-pregunta" th:text="${pregunta.descripcion}">
                 Descripción de la pregunta...
             </p>
+            <div th:if="${pregunta.imagenUrl != null and !#strings.isEmpty(pregunta.imagenUrl)}" class="mt-4">
+                <img th:src="@{${pregunta.imagenUrl}}"
+                     class="max-h-80 rounded-2xl border border-slate-100 object-contain cursor-zoom-in"
+                     onclick="window.open(this.src, '_blank')"
+                     alt="Imagen adjunta a la pregunta">
+            </div>
             <button type="button" onclick="leerTexto('texto-pregunta', this)"
                     class="lia-tts-btn mt-3 inline-flex items-center gap-2 text-[11px] font-black text-eduCian bg-eduCian/10 px-3 py-1.5 rounded-full uppercase hover:bg-eduCian hover:text-white transition-all">
                 <i class="fa-solid fa-volume-high"></i>Escuchar pregunta
@@ -105,7 +111,7 @@
         <h2 class="text-sm font-black text-eduCian uppercase tracking-widest mb-5">
             <i class="fa-solid fa-pen-to-square mr-2"></i>Tu Respuesta
         </h2>
-        <form th:action="@{/respuestas}" method="post">
+        <form th:action="@{/respuestas}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="preguntaId" th:value="${pregunta.idPregunta}">
             <textarea
                     name="contenido"
@@ -113,6 +119,23 @@
                     required
                     class="w-full p-4 rounded-2xl border border-slate-200 outline-none focus:border-eduCian resize-none text-slate-700 font-medium text-sm transition"
                     placeholder="Escribe tu respuesta aquí..."></textarea>
+
+            <div class="mt-3">
+                <label for="input-imagen-respuesta"
+                       class="inline-flex items-center gap-2 border-2 border-dashed border-slate-200 rounded-xl px-4 py-2 text-xs font-black text-slate-400 hover:border-eduCian hover:text-eduCian cursor-pointer transition-colors uppercase tracking-widest">
+                    <i class="fa-solid fa-image"></i>
+                    <span id="imagen-respuesta-label-text">Adjuntar imagen</span>
+                </label>
+                <input type="file" id="input-imagen-respuesta" name="imagenFile" accept="image/*" class="hidden">
+                <div id="imagen-respuesta-preview-wrap" class="hidden mt-3 relative inline-block">
+                    <img id="imagen-respuesta-preview" class="max-h-40 rounded-xl border border-slate-200 object-contain" alt="Vista previa">
+                    <button type="button" id="imagen-respuesta-quitar"
+                            class="absolute -top-2 -right-2 w-6 h-6 bg-terracota text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
             <div class="flex justify-end mt-4">
                 <button type="submit"
                         class="inline-flex items-center gap-2 bg-natureGreen text-white px-8 py-3 rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-natureGreen/30 uppercase tracking-widest">
@@ -170,6 +193,12 @@
                th:id="'texto-respuesta-' + ${r.idRespuesta}" th:text="${r.contenido}">
                 Contenido de la respuesta...
             </p>
+            <div th:if="${r.imagenUrl != null and !#strings.isEmpty(r.imagenUrl)}" class="mb-3">
+                <img th:src="@{${r.imagenUrl}}"
+                     class="max-h-64 rounded-xl border border-slate-100 object-contain cursor-zoom-in"
+                     onclick="window.open(this.src, '_blank')"
+                     alt="Imagen adjunta a la respuesta">
+            </div>
             <button type="button" th:onclick="|leerTexto('texto-respuesta-' + ${r.idRespuesta}, this)|"
                     class="lia-tts-btn mb-4 inline-flex items-center gap-2 text-[11px] font-black text-slate-400 hover:text-eduCian transition-all">
                 <i class="fa-solid fa-volume-high"></i>Escuchar respuesta
@@ -211,6 +240,36 @@
 </main>
 
 <script>
+    const inputImagenRespuesta = document.getElementById('input-imagen-respuesta');
+    const previewRespuestaWrap = document.getElementById('imagen-respuesta-preview-wrap');
+    const previewRespuestaImg = document.getElementById('imagen-respuesta-preview');
+    const imagenRespuestaLabelText = document.getElementById('imagen-respuesta-label-text');
+    const btnQuitarImagenRespuesta = document.getElementById('imagen-respuesta-quitar');
+
+    if (inputImagenRespuesta) {
+        inputImagenRespuesta.addEventListener('change', () => {
+            const archivo = inputImagenRespuesta.files && inputImagenRespuesta.files[0];
+            if (!archivo) {
+                previewRespuestaWrap.classList.add('hidden');
+                imagenRespuestaLabelText.textContent = 'Adjuntar imagen';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewRespuestaImg.src = e.target.result;
+                previewRespuestaWrap.classList.remove('hidden');
+                imagenRespuestaLabelText.textContent = archivo.name;
+            };
+            reader.readAsDataURL(archivo);
+        });
+
+        btnQuitarImagenRespuesta.addEventListener('click', () => {
+            inputImagenRespuesta.value = '';
+            previewRespuestaWrap.classList.add('hidden');
+            imagenRespuestaLabelText.textContent = 'Adjuntar imagen';
+        });
+    }
+
     async function votar(idRespuesta, tipoVoto, idUsuario) {
         const btnLike    = document.getElementById('btn-like-'    + idRespuesta);
         const btnDislike = document.getElementById('btn-dislike-' + idRespuesta);
@@ -254,6 +313,23 @@
     }
 
     let botonHablando = null;
+    let vozFormalCache = null;
+
+    function elegirVozFormal() {
+        if (vozFormalCache) return vozFormalCache;
+        const voces = window.speechSynthesis.getVoices();
+        const preferidas = ['jorge', 'diego', 'pablo', 'enrique', 'juan', 'google español', 'male'];
+        let elegida = voces.find(v => v.lang && v.lang.startsWith('es') &&
+            preferidas.some(nombre => v.name.toLowerCase().includes(nombre)));
+        if (!elegida) elegida = voces.find(v => v.lang && v.lang.startsWith('es'));
+        vozFormalCache = elegida || null;
+        return vozFormalCache;
+    }
+
+    if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = () => { vozFormalCache = null; };
+    }
+
     function leerTexto(idElemento, btn) {
         const synth = window.speechSynthesis;
         if (!synth) return;
@@ -269,7 +345,10 @@
 
         const utter = new SpeechSynthesisUtterance(texto);
         utter.lang = 'es-ES';
-        utter.rate = 1;
+        const voz = elegirVozFormal();
+        if (voz) utter.voice = voz;
+        utter.rate = 0.92;
+        utter.pitch = 0.9;
         botonHablando = btn;
         btn.classList.add('text-eduCian');
         utter.onend = () => { btn.classList.remove('text-eduCian'); botonHablando = null; };

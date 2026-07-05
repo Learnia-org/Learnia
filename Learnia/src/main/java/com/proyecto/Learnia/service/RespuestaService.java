@@ -7,6 +7,7 @@ public interface RespuestaService {
 
     List<Respuesta> listar();
     Respuesta guardar(Long respuestaId, String contenido);
+    Respuesta guardar(Long preguntaId, String contenido, org.springframework.web.multipart.MultipartFile imagen);
     Respuesta guardarComoIA(Long preguntaId, String contenido);
     Respuesta buscarPorId(Long id);
     Respuesta actualizar(Long id, Respuesta respuesta);

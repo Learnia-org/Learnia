@@ -71,6 +71,7 @@ public class PreguntaServiceImpl implements PreguntaService {
         pregunta.setUsuario(usuario);
         pregunta.setCategoria(categoria);
         pregunta.setFechaPublicacion(LocalDateTime.now());
+        pregunta.setImagenUrl(dto.getImagenUrl());
 
         String contenidoCompleto = dto.getTitulo() + ". " + dto.getDescripcion();
         boolean contieneProhibido = geminiService.contieneContenidoProhibido(contenidoCompleto);

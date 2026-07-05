@@ -3,7 +3,6 @@ import com.proyecto.Learnia.entity.RolUsuario;
 import com.proyecto.Learnia.entity.Usuario;
 import com.proyecto.Learnia.exception.ResourceNotFoundException;
 import com.proyecto.Learnia.exception.SuccesException;
-import com.proyecto.Learnia.repository.ComentarioRepository;
 import com.proyecto.Learnia.repository.PreguntaRepository;
 import com.proyecto.Learnia.repository.RecursoRepository;
 import com.proyecto.Learnia.repository.UsuarioRepository;

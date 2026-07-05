@@ -3,6 +3,7 @@ package com.proyecto.Learnia.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import com.proyecto.Learnia.entity.Respuesta;
@@ -23,9 +24,10 @@ public class RespuestaController {
 
     @PostMapping
     public String guardar(@RequestParam String contenido,
-                          @RequestParam Long preguntaId) {
+                          @RequestParam Long preguntaId,
+                          @RequestParam(value = "imagenFile", required = false) MultipartFile imagenFile) {
 
-        respuestaService.guardar(preguntaId, contenido);
+        respuestaService.guardar(preguntaId, contenido, imagenFile);
         return "redirect:/pregunta/" + preguntaId;
     }
 

@@ -45,6 +45,7 @@ create table pregunta(
                          fecha_publicacion datetime default current_timestamp,
                          id_usuario bigint not null,
                          id_categoria bigint not null,
+                         imagen_url varchar(255),
                          constraint fk_id_usuarios
                              foreign key (id_usuario) references usuario(id_usuario) on delete cascade,
                          constraint fk_id_categorias
@@ -57,25 +58,11 @@ create table respuesta(
                           fecha_respuesta datetime default current_timestamp,
                           id_usuario bigint not null,
                           id_pregunta bigint not null,
+                          imagen_url varchar(255),
                           constraint fk_respuesta_usuario
                               foreign key (id_usuario) references usuario(id_usuario) on delete cascade,
                           constraint fk_respuesta_pregunta
                               foreign key (id_pregunta) references pregunta(id_pregunta) on delete cascade
-);
-
-create table comentario(
-                           id_comentario bigint auto_increment primary key,
-                           contenido text not null,
-                           fecha datetime default current_timestamp,
-                           id_usuario bigint not null,
-                           id_recurso bigint null,
-                           id_respuesta bigint null,
-                           constraint fk_usuario
-                               foreign key (id_usuario) references usuario(id_usuario) on delete cascade,
-                           constraint fk_respuesta
-                               foreign key (id_respuesta) references respuesta(id_respuesta) on delete cascade,
-                           constraint fk_recurso
-                               foreign key (id_recurso) references recurso(id_recurso) on delete cascade
 );
 
 create table voto(

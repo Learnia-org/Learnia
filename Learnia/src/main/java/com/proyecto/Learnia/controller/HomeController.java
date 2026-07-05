@@ -11,6 +11,7 @@ import com.proyecto.Learnia.repository.RespuestaRepository;
 import com.proyecto.Learnia.repository.UsuarioRepository;
 import com.proyecto.Learnia.service.PlanEstudioService;
 import com.proyecto.Learnia.service.PreguntaService;
+import com.proyecto.Learnia.service.FileStorageService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -40,6 +41,7 @@ public class HomeController {
     private final RespuestaRepository respuestaRepository;
     private final PasswordEncoder passwordEncoder;
     private final PlanEstudioService planEstudioService;
+    private final FileStorageService fileStorageService;
 
     public HomeController(UsuarioRepository usuarioRepository,
                           PreguntaService preguntaService,
@@ -47,7 +49,8 @@ public class HomeController {
                           PreguntaRepository preguntaRepository,
                           RespuestaRepository respuestaRepository,
                           PasswordEncoder passwordEncoder,
-                          PlanEstudioService planEstudioService) {
+                          PlanEstudioService planEstudioService,
+                          FileStorageService fileStorageService) {
         this.usuarioRepository = usuarioRepository;
         this.preguntaService = preguntaService;
         this.categoriaRepository = categoriaRepository;
@@ -55,6 +58,7 @@ public class HomeController {
         this.respuestaRepository = respuestaRepository;
         this.passwordEncoder = passwordEncoder;
         this.planEstudioService = planEstudioService;
+        this.fileStorageService = fileStorageService;
     }
 
     @GetMapping("/")
@@ -207,11 +211,23 @@ public class HomeController {
 
     @PostMapping("/preguntar")
     public String guardarPregunta(@ModelAttribute PreguntaDTO dto,
-                                  @AuthenticationPrincipal UserDetails userDetails) {
+                                  @RequestParam(value = "imagenFile", required = false) MultipartFile imagenFile,
+                                  @AuthenticationPrincipal UserDetails userDetails,
+                                  Model model) {
         Usuario usuario = usuarioRepository
                 .findByCorreoUsuario(userDetails.getUsername())
                 .orElseThrow();
         dto.setIdUsuario(usuario.getIdUsuario());
+        try {
+            if (imagenFile != null && !imagenFile.isEmpty()) {
+                dto.setImagenUrl(fileStorageService.guardarImagenPregunta(imagenFile));
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            model.addAttribute("error", "No se pudo adjuntar la imagen: " + e.getMessage());
+            model.addAttribute("preguntaDTO", dto);
+            model.addAttribute("categorias", categoriaRepository.findByActivaTrue());
+            return "preguntar";
+        }
         preguntaService.guardar(dto);
         return "redirect:/menu";
     }

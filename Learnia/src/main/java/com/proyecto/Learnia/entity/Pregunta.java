@@ -45,6 +45,9 @@ public class Pregunta {
     @Column(name = "oculta", columnDefinition = "boolean default false")
     private boolean oculta = false;
 
+    @Column(name = "imagen_url", length = 255)
+    private String imagenUrl;
+
     @OneToMany(mappedBy = "pregunta", fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Respuesta> respuestas;

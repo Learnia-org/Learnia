@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<div th:fragment="chatbot">
+<div th:fragment="chatbot" id="lia-chatbot-root-fragment">
 
     <style>
         #lia-chat-root, #lia-chat-root * { box-sizing: border-box; }
@@ -29,6 +29,7 @@
         }
         #lia-chat-toggle:hover { transform: scale(1.08); box-shadow: 0 8px 22px rgba(44, 62, 80, 0.5); }
         #lia-chat-toggle svg { width: 28px; height: 28px; fill: #ffffff; }
+        #lia-chat-toggle img.lia-logo-icon { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
         #lia-chat-toggle .lia-badge {
             position: absolute;
             top: -4px;
@@ -83,6 +84,7 @@
             display: flex; align-items: center; justify-content: center;
         }
         #lia-chat-header .lia-avatar svg { width: 18px; height: 18px; fill: #fff; }
+        #lia-chat-header .lia-avatar img.lia-logo-icon { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
         #lia-chat-header .lia-actions { display: flex; gap: 6px; }
         #lia-chat-header button.lia-icon-btn {
             background: transparent; border: none; color: #fff; opacity: 0.85;
@@ -105,10 +107,16 @@
         .lia-msg-user { align-self: flex-end; background: #2980B9; color: #fff; border-bottom-right-radius: 4px; }
         .lia-msg-error { background: #FEECEC; color: #B91C1C; border: 1px solid #FCA5A5; }
 
-        .lia-typing { align-self: flex-start; display: flex; gap: 4px; padding: 10px 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; border-bottom-left-radius: 4px; }
-        .lia-typing span { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; animation: liaBlink 1.2s infinite ease-in-out; }
-        .lia-typing span:nth-child(2) { animation-delay: 0.15s; }
-        .lia-typing span:nth-child(3) { animation-delay: 0.3s; }
+        .lia-typing { align-self: flex-start; display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; border-bottom-left-radius: 4px; }
+        .lia-typing-label { font-size: 11px; font-weight: 700; color: #2980B9; letter-spacing: 0.02em; }
+        .lia-typing-waves { display: flex; align-items: flex-end; gap: 3px; height: 14px; }
+        .lia-typing-waves span { width: 3px; border-radius: 2px; background: linear-gradient(to top, #2980B9, #6ec3f4); animation: liaWave 0.9s infinite ease-in-out; }
+        .lia-typing-waves span:nth-child(1) { animation-delay: 0s; }
+        .lia-typing-waves span:nth-child(2) { animation-delay: 0.12s; }
+        .lia-typing-waves span:nth-child(3) { animation-delay: 0.24s; }
+        .lia-typing-waves span:nth-child(4) { animation-delay: 0.36s; }
+        .lia-typing-waves span:nth-child(5) { animation-delay: 0.48s; }
+        @keyframes liaWave { 0%, 100% { height: 4px; opacity: 0.5; } 50% { height: 14px; opacity: 1; } }
         @keyframes liaBlink { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
 
         #lia-chat-inputbar {
@@ -166,6 +174,162 @@
             #lia-chat-panel { right: 12px; left: 12px; width: auto; bottom: 84px; }
             #lia-chat-root { right: 12px; bottom: 12px; }
         }
+        #lia-call-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999999;
+            background: radial-gradient(circle at 50% 20%, #1f3a5f 0%, #0f1b2d 65%, #0a1420 100%);
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px 50px;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #fff;
+        }
+        #lia-call-overlay.lia-call-open { display: flex; }
+        #lia-call-topbar { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; opacity: 0.75; }
+        #lia-call-orb-wrap {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #lia-call-orb {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2980B9, #6ec3f4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(41,128,185,0.6);
+            z-index: 2;
+            transition: transform 0.25s ease;
+        }
+        #lia-call-orb svg { width: 54px; height: 54px; fill: #fff; }
+        #lia-call-orb img.lia-logo-icon { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }
+        #lia-call-ring1, #lia-call-ring2 {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(110, 195, 244, 0.5);
+            width: 130px;
+            height: 130px;
+            opacity: 0;
+        }
+        #lia-call-overlay.lia-listening #lia-call-orb { transform: scale(1.08); box-shadow: 0 0 55px rgba(39,174,96,0.7); background: linear-gradient(135deg, #27AE60, #6ee7a0); }
+        #lia-call-overlay.lia-listening #lia-call-ring1 { animation: liaCallRing 1.6s infinite ease-out; border-color: rgba(39,174,96,0.55); }
+        #lia-call-overlay.lia-listening #lia-call-ring2 { animation: liaCallRing 1.6s infinite ease-out 0.5s; border-color: rgba(39,174,96,0.4); }
+        #lia-call-overlay.lia-thinking #lia-call-orb { animation: liaCallThink 1s infinite ease-in-out; background: linear-gradient(135deg, #F1C40F, #f7dc6f); box-shadow: 0 0 55px rgba(241,196,15,0.6); }
+        #lia-call-overlay.lia-speaking #lia-call-orb { animation: liaCallSpeak 0.5s infinite ease-in-out; box-shadow: 0 0 55px rgba(41,128,185,0.85); }
+        @keyframes liaCallRing { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.7); opacity: 0; } }
+        @keyframes liaCallThink { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(0.94) rotate(4deg); } }
+        @keyframes liaCallSpeak { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+        #lia-call-status { margin-top: 22px; font-size: 15px; font-weight: 700; opacity: 0.9; text-align: center; }
+        #lia-call-caption-wrap {
+            margin-top: 14px;
+            width: 100%;
+            max-width: 460px;
+            display: flex;
+            justify-content: center;
+            padding: 0 12px;
+        }
+        #lia-call-caption {
+            font-size: 15px;
+            line-height: 1.55;
+            font-weight: 400;
+            opacity: 0;
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            max-height: 168px;
+            overflow-y: auto;
+            padding: 14px 18px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.09);
+            backdrop-filter: blur(6px);
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            transition: opacity 0.25s ease;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+        #lia-call-caption:empty { padding: 0; border: none; background: transparent; }
+        #lia-call-caption.lia-caption-visible { opacity: 1; }
+        #lia-call-caption.lia-caption-user { font-style: italic; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.04); }
+        #lia-call-caption::-webkit-scrollbar { width: 5px; }
+        #lia-call-caption::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 3px; }
+        #lia-call-controls { display: flex; gap: 26px; align-items: center; }
+        #lia-call-controls button {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, background 0.2s ease;
+        }
+        #lia-call-controls button:hover { transform: scale(1.06); }
+        #lia-call-controls button svg { width: 22px; height: 22px; fill: #fff; }
+        #lia-call-mute { background: rgba(255,255,255,0.15); }
+        #lia-call-mute.lia-muted { background: #F1C40F; }
+        #lia-call-mute.lia-muted svg { fill: #2C3E50; }
+        #lia-call-hangup { background: #D35400; }
+        #lia-call-hangup:hover { background: #e35d00; }
+
+        #lia-call-topbar-row { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 460px; padding: 0 4px; }
+        #lia-call-minimize {
+            background: rgba(255,255,255,0.12);
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease;
+        }
+        #lia-call-minimize:hover { background: rgba(255,255,255,0.22); }
+        #lia-call-minimize svg { width: 16px; height: 16px; fill: #fff; }
+
+        #lia-call-mini {
+            display: none;
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999998;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #1f3a5f, #0f1b2d);
+            color: #fff;
+            padding: 8px 10px 8px 14px;
+            border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        #lia-call-mini.lia-mini-open { display: flex; }
+        #lia-call-mini .lia-mini-dot {
+            width: 9px; height: 9px; border-radius: 50%; background: #27AE60; flex-shrink: 0;
+            animation: liaMiniPulse 1.4s infinite ease-in-out;
+        }
+        @keyframes liaMiniPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        #lia-call-mini .lia-mini-label { font-size: 12.5px; font-weight: 600; opacity: 0.9; white-space: nowrap; }
+        #lia-call-mini .lia-mini-timer { font-size: 12.5px; font-variant-numeric: tabular-nums; opacity: 0.75; }
+        #lia-call-mini button {
+            border: none; cursor: pointer; border-radius: 50%;
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        #lia-call-mini button svg { width: 14px; height: 14px; fill: #fff; }
+        #lia-call-mini-hangup { background: #D35400; }
+        #lia-call-mini-hangup:hover { background: #e35d00; }
     </style>
 
     <div id="lia-chat-root">
@@ -173,7 +337,7 @@
             <div id="lia-chat-header">
                 <div class="lia-title">
                     <div class="lia-avatar">
-                        <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2v1h1a3 3 0 0 1 3 3v3.5A3.5 3.5 0 0 1 14.5 15h-5A3.5 3.5 0 0 1 6 11.5V8a3 3 0 0 1 3-3h1V4a2 2 0 0 1 2-2Zm-3 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM4 12h1v4a1 1 0 0 1-2 0v-3a1 1 0 0 1 1-1Zm16 0a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0v-4h1ZM9 19h6a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2Z"/></svg>
+                        <img th:src="@{/img/learnia-icon.png}" alt="Learnia" class="lia-logo-icon">
                     </div>
                     <div class="lia-title-text">
                         <strong>Asistente Learnia</strong>
@@ -181,6 +345,9 @@
                     </div>
                 </div>
                 <div class="lia-actions">
+                    <button type="button" class="lia-icon-btn" id="lia-chat-call" title="Llamar al asistente">
+                        <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8Z"/></svg>
+                    </button>
                     <button type="button" class="lia-icon-btn" id="lia-chat-clear" title="Nueva conversación">
                         <svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7L6 7Zm3-3h6l1 2H8l1-2Zm-1 5 .6 10h.9L9 9H8Zm4 0 .5 10h.9L13 9h-1Z"/></svg>
                     </button>
@@ -204,7 +371,46 @@
         </div>
 
         <button type="button" id="lia-chat-toggle" title="Chatear con la IA de Learnia">
-            <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2v1h1a3 3 0 0 1 3 3v3.5A3.5 3.5 0 0 1 14.5 15h-5A3.5 3.5 0 0 1 6 11.5V8a3 3 0 0 1 3-3h1V4a2 2 0 0 1 2-2Zm-3 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM4 12h1v4a1 1 0 0 1-2 0v-3a1 1 0 0 1 1-1Zm16 0a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0v-4h1ZM9 19h6a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2Z"/></svg>
+            <img th:src="@{/img/learnia-icon.png}" alt="Learnia" class="lia-logo-icon">
+        </button>
+    </div>
+
+    <div id="lia-call-overlay">
+        <div id="lia-call-topbar-row">
+            <div id="lia-call-topbar">
+                <span id="lia-call-timer">00:00</span>
+            </div>
+            <button type="button" id="lia-call-minimize" title="Dejar la llamada en segundo plano">
+                <svg viewBox="0 0 24 24"><path d="M6 19h12v2H6v-2Z"/></svg>
+            </button>
+        </div>
+        <div id="lia-call-orb-wrap">
+            <div id="lia-call-orb">
+                <img th:src="@{/img/learnia-icon.png}" alt="Learnia" class="lia-logo-icon">
+            </div>
+            <div id="lia-call-ring1"></div>
+            <div id="lia-call-ring2"></div>
+        </div>
+        <div id="lia-call-status">Conectando…</div>
+        <div id="lia-call-caption-wrap">
+            <div id="lia-call-caption"></div>
+        </div>
+        <div id="lia-call-controls">
+            <button type="button" id="lia-call-mute" title="Silenciar">
+                <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg>
+            </button>
+            <button type="button" id="lia-call-hangup" title="Colgar">
+                <svg viewBox="0 0 24 24"><path d="M12 9c-2.5 0-4.9.5-7.1 1.4-.5.2-.9.7-.9 1.3v3.1c0 .6.4 1.1 1 1.2 1.3.2 2.5.6 3.7 1.1.5.2 1 0 1.3-.4l1.2-1.6c1.2.4 2.5.6 3.8.6s2.6-.2 3.8-.6l1.2 1.6c.3.4.8.5 1.3.4 1.2-.5 2.4-.9 3.7-1.1.6-.1 1-.6 1-1.2v-3.1c0-.6-.4-1.1-.9-1.3C16.9 9.5 14.5 9 12 9Z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="lia-call-mini" title="Volver a la llamada">
+        <span class="lia-mini-dot"></span>
+        <span class="lia-mini-label">Llamada en curso</span>
+        <span class="lia-mini-timer" id="lia-call-mini-timer">00:00</span>
+        <button type="button" id="lia-call-mini-hangup" title="Colgar">
+            <svg viewBox="0 0 24 24"><path d="M12 9c-2.5 0-4.9.5-7.1 1.4-.5.2-.9.7-.9 1.3v3.1c0 .6.4 1.1 1 1.2 1.3.2 2.5.6 3.7 1.1.5.2 1 0 1.3-.4l1.2-1.6c1.2.4 2.5.6 3.8.6s2.6-.2 3.8-.6l1.2 1.6c.3.4.8.5 1.3.4 1.2-.5 2.4-.9 3.7-1.1.6-.1 1-.6 1-1.2v-3.1c0-.6-.4-1.1-.9-1.3C16.9 9.5 14.5 9 12 9Z"/></svg>
         </button>
     </div>
 
@@ -215,6 +421,7 @@
     (function () {
         var STORAGE_KEY = 'lia_chat_history_v1_' + (window.LIA_USER_KEY || 'anon');
         var OPEN_KEY = 'lia_chat_open_v1_' + (window.LIA_USER_KEY || 'anon');
+        var CALL_STATE_KEY = 'lia_call_state_v1_' + (window.LIA_USER_KEY || 'anon');
 
         var panel = document.getElementById('lia-chat-panel');
         var toggleBtn = document.getElementById('lia-chat-toggle');
@@ -236,6 +443,38 @@
 
         var synth = window.speechSynthesis;
         var vozSoportada = !!synth;
+        var vozFormalChatCache = null;
+
+        function elegirVozFormalChat() {
+            if (vozFormalChatCache) return vozFormalChatCache;
+            var voces = synth.getVoices();
+            var preferidas = ['jorge', 'diego', 'pablo', 'enrique', 'juan', 'google español', 'male'];
+            var elegida = voces.find(function (v) {
+                return v.lang && v.lang.indexOf('es') === 0 &&
+                    preferidas.some(function (nombre) { return v.name.toLowerCase().indexOf(nombre) !== -1; });
+            });
+            if (!elegida) elegida = voces.find(function (v) { return v.lang && v.lang.indexOf('es') === 0; });
+            vozFormalChatCache = elegida || null;
+            return vozFormalChatCache;
+        }
+
+        if (vozSoportada) {
+            synth.onvoiceschanged = function () { vozFormalChatCache = null; };
+        }
+
+        function conVocesListas(cb) {
+            if (!vozSoportada) { cb(); return; }
+            if (synth.getVoices().length) { cb(); return; }
+            var listo = false;
+            var terminar = function () {
+                if (listo) return;
+                listo = true;
+                synth.removeEventListener('voiceschanged', terminar);
+                cb();
+            };
+            synth.addEventListener('voiceschanged', terminar);
+            setTimeout(terminar, 300);
+        }
 
         function leerEnVozAlta(texto, btn) {
             if (!vozSoportada) return;
@@ -245,7 +484,10 @@
             }
             var utter = new SpeechSynthesisUtterance(texto);
             utter.lang = 'es-ES';
-            utter.rate = 1;
+            var voz = elegirVozFormalChat();
+            if (voz) utter.voice = voz;
+            utter.rate = 0.92;
+            utter.pitch = 0.9;
             synth.speak(utter);
         }
 
@@ -291,7 +533,7 @@
             var typing = document.createElement('div');
             typing.className = 'lia-typing';
             typing.id = 'lia-chat-typing';
-            typing.innerHTML = '<span></span><span></span><span></span>';
+            typing.innerHTML = '<span class="lia-typing-waves"><span></span><span></span><span></span><span></span><span></span></span><span class="lia-typing-label">La IA está pensando…</span>';
             messagesBox.appendChild(typing);
             messagesBox.scrollTop = messagesBox.scrollHeight;
         }
@@ -336,7 +578,7 @@
 
         sendBtn.addEventListener('click', enviarMensaje);
 
-        function enviarMensaje() {
+        function enviarMensaje(viaVoz) {
             var texto = input.value.trim();
             if (!texto) return;
 
@@ -370,6 +612,7 @@
                     var h = getHistory();
                     h.push({ role: 'model', texto: respuesta });
                     saveHistory(h);
+                    if (viaVoz) leerEnVozAlta(respuesta, null);
                 })
                 .catch(function () {
                     hideTyping();
@@ -386,11 +629,39 @@
         }
 
         var micBtn = document.getElementById('lia-chat-mic');
+        var callBtn = document.getElementById('lia-chat-call');
+        var callOverlay = document.getElementById('lia-call-overlay');
+        var callStatusEl = document.getElementById('lia-call-status');
+        var callCaptionEl = document.getElementById('lia-call-caption');
+        var callTimerEl = document.getElementById('lia-call-timer');
+        var callMuteBtn = document.getElementById('lia-call-mute');
+        var callHangupBtn = document.getElementById('lia-call-hangup');
+        var callMinimizeBtn = document.getElementById('lia-call-minimize');
+        var callMini = document.getElementById('lia-call-mini');
+        var callMiniTimerEl = document.getElementById('lia-call-mini-timer');
+        var callMiniHangupBtn = document.getElementById('lia-call-mini-hangup');
         var SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        var modoLlamada = false;
+        var llamadaMuted = false;
+        var callStartTs = null;
+        var callTimerInterval = null;
+        var llamadaMinimizada = false;
+        var estadoLlamadaActual = 'listening';
+        var ultimoTextoHablado = '';
+        var fragmentosHablados = [];
+        var fragmentoIndiceActual = 0;
+
+        function dividirEnFragmentos(texto) {
+            var partes = texto.match(/[^.!?\n]+[.!?]+(\s+|$)|[^.!?\n]+$/g);
+            if (!partes || !partes.length) return [texto];
+            return partes.map(function (p) { return p.trim(); }).filter(Boolean);
+        }
 
         if (!SpeechRecognitionImpl) {
             if (micBtn) micBtn.style.display = 'none';
-        } else if (micBtn) {
+            if (callBtn) callBtn.style.display = 'none';
+        } else {
             var recognizer = new SpeechRecognitionImpl();
             recognizer.lang = 'es-ES';
             recognizer.interimResults = false;
@@ -399,37 +670,480 @@
 
             recognizer.onresult = function (event) {
                 var texto = event.results[0][0].transcript;
-                input.value = (input.value ? input.value + ' ' : '') + texto;
-                input.dispatchEvent(new Event('input'));
-                input.focus();
+                if (modoLlamada) {
+                    procesarTurnoLlamada(texto);
+                } else {
+                    input.value = (input.value ? input.value + ' ' : '') + texto;
+                    input.dispatchEvent(new Event('input'));
+                    enviarMensaje(true);
+                }
             };
 
             recognizer.onend = function () {
                 escuchando = false;
-                micBtn.classList.remove('lia-recording');
-            };
-
-            recognizer.onerror = function () {
-                escuchando = false;
-                micBtn.classList.remove('lia-recording');
-            };
-
-            micBtn.addEventListener('click', function () {
-                if (escuchando) {
-                    recognizer.stop();
-                    return;
-                }
-                try {
-                    if (synth && synth.speaking) synth.cancel();
-                    escuchando = true;
-                    micBtn.classList.add('lia-recording');
-                    recognizer.start();
-                } catch (e) {
-                    escuchando = false;
+                if (modoLlamada) {
+                    if (callOverlay.classList.contains('lia-listening')) {
+                        setTimeout(function () {
+                            if (modoLlamada && !llamadaMuted) iniciarEscuchaLlamada();
+                        }, 300);
+                    }
+                } else if (micBtn) {
                     micBtn.classList.remove('lia-recording');
                 }
+            };
+
+            recognizer.onerror = function (event) {
+                escuchando = false;
+                if (modoLlamada) {
+                    if (callOverlay.classList.contains('lia-listening')) {
+                        setTimeout(function () {
+                            if (modoLlamada && !llamadaMuted) iniciarEscuchaLlamada();
+                        }, 300);
+                    }
+                } else if (micBtn) {
+                    micBtn.classList.remove('lia-recording');
+                }
+            };
+
+            if (micBtn) {
+                micBtn.addEventListener('click', function () {
+                    if (modoLlamada) return;
+                    if (escuchando) {
+                        recognizer.stop();
+                        return;
+                    }
+                    try {
+                        if (synth && synth.speaking) synth.cancel();
+                        escuchando = true;
+                        micBtn.classList.add('lia-recording');
+                        recognizer.start();
+                    } catch (e) {
+                        escuchando = false;
+                        micBtn.classList.remove('lia-recording');
+                    }
+                });
+            }
+        }
+
+        function setEstadoLlamada(estado) {
+            estadoLlamadaActual = estado;
+            callOverlay.classList.remove('lia-listening', 'lia-thinking', 'lia-speaking');
+            callOverlay.classList.add('lia-' + estado);
+            callStatusEl.textContent = estado === 'listening' ? 'Escuchando…'
+                : estado === 'thinking' ? 'Pensando…'
+                : 'Hablando…';
+            guardarEstadoLlamada();
+        }
+
+        function iniciarEscuchaLlamada() {
+            if (!modoLlamada || llamadaMuted || !recognizer) return;
+            ultimoTextoHablado = '';
+            fragmentosHablados = [];
+            fragmentoIndiceActual = 0;
+            setEstadoLlamada('listening');
+            callCaptionEl.classList.remove('lia-caption-visible', 'lia-caption-user');
+            callCaptionEl.textContent = '';
+            try {
+                escuchando = true;
+                recognizer.start();
+            } catch (e) { /* ya estaba escuchando */ }
+        }
+
+        function mostrarCaptionLlamada(texto, esUsuario) {
+            callCaptionEl.classList.remove('lia-caption-visible');
+            setTimeout(function () {
+                callCaptionEl.textContent = texto;
+                callCaptionEl.classList.toggle('lia-caption-user', !!esUsuario);
+                callCaptionEl.classList.add('lia-caption-visible');
+                callCaptionEl.scrollTop = 0;
+            }, 120);
+        }
+
+        // Texto del turno de usuario que está esperando respuesta de la IA.
+        // Se guarda en el estado persistido para poder reintentarlo si la
+        // navegación entre páginas interrumpe el fetch antes de que llegue la respuesta.
+        var turnoPendienteTexto = null;
+
+        function procesarTurnoLlamada(texto) {
+            mostrarCaptionLlamada('"' + texto + '"', true);
+
+            var history = getHistory();
+            renderMessage('user', texto);
+            history.push({ role: 'user', texto: texto });
+            saveHistory(history);
+
+            turnoPendienteTexto = texto;
+            setEstadoLlamada('thinking');
+            resolverTurnoLlamada(texto, history);
+        }
+
+        function resolverTurnoLlamada(texto, history) {
+            fetch('/api/chatbot/mensaje', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensaje: texto, historial: history })
+            })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Error de red');
+                    return res.json();
+                })
+                .then(function (data) {
+                    var respuesta = data.respuesta || 'No obtuve respuesta, intenta de nuevo.';
+                    turnoPendienteTexto = null;
+                    renderMessage('model', respuesta);
+                    var h = getHistory();
+                    h.push({ role: 'model', texto: respuesta });
+                    saveHistory(h);
+                    hablarEnLlamada(respuesta);
+                })
+                .catch(function () {
+                    turnoPendienteTexto = null;
+                    var msg = 'Ocurrió un error, intenta de nuevo.';
+                    hablarEnLlamada(msg);
+                });
+        }
+
+        function hablarEnLlamada(texto) {
+            if (!synth) return;
+            ultimoTextoHablado = texto;
+            fragmentosHablados = dividirEnFragmentos(texto);
+            fragmentoIndiceActual = 0;
+            setEstadoLlamada('speaking');
+            mostrarCaptionLlamada(texto, false);
+            if (synth.speaking) synth.cancel();
+            hablarSiguienteFragmento();
+        }
+
+        function hablarSiguienteFragmento() {
+            if (!modoLlamada) return;
+            if (fragmentoIndiceActual >= fragmentosHablados.length) {
+                if (!llamadaMuted) {
+                    iniciarEscuchaLlamada();
+                } else {
+                    setEstadoLlamada('listening');
+                    callStatusEl.textContent = 'En pausa';
+                }
+                return;
+            }
+            var fragmento = fragmentosHablados[fragmentoIndiceActual];
+            conVocesListas(function () {
+                var utter = new SpeechSynthesisUtterance(fragmento);
+                utter.lang = 'es-ES';
+                var voz = elegirVozFormalChat();
+                if (voz) utter.voice = voz;
+                utter.rate = 0.92;
+                utter.pitch = 0.9;
+                utter.onend = function () {
+                    fragmentoIndiceActual++;
+                    guardarEstadoLlamada();
+                    hablarSiguienteFragmento();
+                };
+                synth.speak(utter);
             });
         }
+
+        function actualizarCallTimer() {
+            var segs = Math.floor((Date.now() - callStartTs) / 1000);
+            var mm = String(Math.floor(segs / 60)).padStart(2, '0');
+            var ss = String(segs % 60).padStart(2, '0');
+            var texto = mm + ':' + ss;
+            callTimerEl.textContent = texto;
+            callMiniTimerEl.textContent = texto;
+        }
+
+        function guardarEstadoLlamada(forzarMinimizada) {
+            if (!modoLlamada) { sessionStorage.removeItem(CALL_STATE_KEY); return; }
+            var estado = {
+                activo: true,
+                muted: llamadaMuted,
+                startTs: callStartTs,
+                minimizada: forzarMinimizada ? true : llamadaMinimizada,
+                estado: estadoLlamadaActual,
+                ultimoTexto: ultimoTextoHablado,
+                fragmentoIndice: fragmentoIndiceActual,
+                pendiente: turnoPendienteTexto
+            };
+            sessionStorage.setItem(CALL_STATE_KEY, JSON.stringify(estado));
+        }
+
+        function limpiarEstadoLlamada() {
+            sessionStorage.removeItem(CALL_STATE_KEY);
+        }
+
+        function minimizarLlamada() {
+            if (!modoLlamada) return;
+            llamadaMinimizada = true;
+            callOverlay.classList.remove('lia-call-open');
+            callMini.classList.add('lia-mini-open');
+            guardarEstadoLlamada();
+        }
+
+        function restaurarLlamada() {
+            if (!modoLlamada) return;
+            llamadaMinimizada = false;
+            callMini.classList.remove('lia-mini-open');
+            callOverlay.classList.add('lia-call-open');
+            guardarEstadoLlamada();
+        }
+
+        function abrirLlamada() {
+            if (!SpeechRecognitionImpl) return;
+            modoLlamada = true;
+            llamadaMuted = false;
+            llamadaMinimizada = false;
+            callMuteBtn.classList.remove('lia-muted');
+            callOverlay.classList.add('lia-call-open');
+            callStartTs = Date.now();
+            callTimerEl.textContent = '00:00';
+            callMiniTimerEl.textContent = '00:00';
+            callTimerInterval = setInterval(actualizarCallTimer, 500);
+            guardarEstadoLlamada();
+            hablarEnLlamada('Hola, soy el asistente de Learnia. Te escucho.');
+        }
+
+        function cerrarLlamada() {
+            modoLlamada = false;
+            llamadaMinimizada = false;
+            if (synth) synth.cancel();
+            if (recognizer) {
+                try { recognizer.stop(); } catch (e) { /* nada que detener */ }
+            }
+            escuchando = false;
+            clearInterval(callTimerInterval);
+            callOverlay.classList.remove('lia-call-open', 'lia-listening', 'lia-thinking', 'lia-speaking');
+            callMini.classList.remove('lia-mini-open');
+            limpiarEstadoLlamada();
+        }
+
+        if (callBtn) {
+            callBtn.addEventListener('click', abrirLlamada);
+        }
+        callHangupBtn.addEventListener('click', cerrarLlamada);
+        callMiniHangupBtn.addEventListener('click', cerrarLlamada);
+        callMinimizeBtn.addEventListener('click', minimizarLlamada);
+        callMini.addEventListener('click', function (e) {
+            if (e.target === callMiniHangupBtn || callMiniHangupBtn.contains(e.target)) return;
+            restaurarLlamada();
+        });
+        callMuteBtn.addEventListener('click', function () {
+            llamadaMuted = !llamadaMuted;
+            callMuteBtn.classList.toggle('lia-muted', llamadaMuted);
+            if (llamadaMuted) {
+                if (recognizer) { try { recognizer.stop(); } catch (e) { /* nada que detener */ } }
+                callStatusEl.textContent = 'En pausa';
+                callOverlay.classList.remove('lia-listening', 'lia-thinking', 'lia-speaking');
+            } else if (modoLlamada && synth && !synth.speaking) {
+                iniciarEscuchaLlamada();
+            }
+            guardarEstadoLlamada();
+        });
+
+        // Si hay una llamada activa guardada de una página anterior, la retomamos aquí.
+        window.addEventListener('pagehide', function () {
+            if (modoLlamada) guardarEstadoLlamada(true);
+        });
+
+        (function reanudarLlamadaSiCorresponde() {
+            if (!SpeechRecognitionImpl) return;
+            var raw = sessionStorage.getItem(CALL_STATE_KEY);
+            if (!raw) return;
+            var estado;
+            try { estado = JSON.parse(raw); } catch (e) { return; }
+            if (!estado || !estado.activo) return;
+
+            modoLlamada = true;
+            llamadaMuted = !!estado.muted;
+            llamadaMinimizada = true;
+            callStartTs = estado.startTs || Date.now();
+
+            callMuteBtn.classList.toggle('lia-muted', llamadaMuted);
+            callMini.classList.add('lia-mini-open');
+            callOverlay.classList.remove('lia-call-open');
+            actualizarCallTimer();
+            callTimerInterval = setInterval(actualizarCallTimer, 500);
+
+            if (llamadaMuted) {
+                estadoLlamadaActual = estado.estado === 'speaking' ? 'speaking' : 'listening';
+                ultimoTextoHablado = estado.ultimoTexto || '';
+                fragmentosHablados = ultimoTextoHablado ? dividirEnFragmentos(ultimoTextoHablado) : [];
+                fragmentoIndiceActual = estado.fragmentoIndice || 0;
+                turnoPendienteTexto = estado.pendiente || null;
+                callStatusEl.textContent = 'En pausa';
+                guardarEstadoLlamada(true);
+            } else if (estado.estado === 'thinking' && estado.pendiente) {
+                // La página cambió mientras esperábamos la respuesta de la IA: el fetch anterior
+                // se perdió con la navegación, así que reintentamos el mismo turno aquí.
+                mostrarCaptionLlamada('"' + estado.pendiente + '"', true);
+                turnoPendienteTexto = estado.pendiente;
+                setEstadoLlamada('thinking');
+                resolverTurnoLlamada(estado.pendiente, getHistory());
+            } else if (estado.estado === 'speaking' && estado.ultimoTexto) {
+                // El asistente se quedó a mitad de una respuesta: seguimos desde la misma oración, no desde el inicio.
+                ultimoTextoHablado = estado.ultimoTexto;
+                fragmentosHablados = dividirEnFragmentos(estado.ultimoTexto);
+                fragmentoIndiceActual = estado.fragmentoIndice || 0;
+                if (fragmentoIndiceActual < fragmentosHablados.length) {
+                    setEstadoLlamada('speaking');
+                    mostrarCaptionLlamada(estado.ultimoTexto, false);
+                    hablarSiguienteFragmento();
+                } else {
+                    iniciarEscuchaLlamada();
+                }
+            } else {
+                iniciarEscuchaLlamada();
+            }
+        })();
+
+        // Guardado adicional para el caso en que 'pagehide' no llegue a tiempo
+        // (por ejemplo en móviles al cambiar de app o pestaña justo al navegar).
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden && modoLlamada) guardarEstadoLlamada(true);
+        });
+
+        // ------------------------------------------------------------------
+        // NAVEGACIÓN FLUIDA DURANTE LA LLAMADA
+        // ------------------------------------------------------------------
+        // Fuera de una llamada, todos los enlaces funcionan exactamente igual
+        // que antes (recarga normal de página). Pero mientras hay una llamada
+        // activa, interceptamos los clics en enlaces internos y traemos la
+        // página siguiente por fetch, reemplazando solo el contenido de
+        // <body> y <head>. El widget de la llamada (audio, reconocimiento de
+        // voz, temporizador) nunca se destruye ni se vuelve a crear, así que
+        // no hay ningún corte: es la misma llamada, ininterrumpida, como en
+        // una llamada de WhatsApp, sin importar cuántas páginas visites.
+        //
+        // Si por cualquier motivo la carga por fetch falla, se cae de forma
+        // segura a una navegación normal, y ahí entra en juego el mecanismo
+        // de reanudación por sessionStorage de arriba como respaldo.
+        var LIA_DYN_HEAD_ATTR = 'data-lia-dyn-head';
+
+        function liaLimpiarHeadDinamico() {
+            var previos = document.querySelectorAll('[' + LIA_DYN_HEAD_ATTR + ']');
+            for (var i = 0; i < previos.length; i++) previos[i].parentNode.removeChild(previos[i]);
+        }
+
+        function liaClonarScriptEjecutable(original) {
+            var s = document.createElement('script');
+            for (var i = 0; i < original.attributes.length; i++) {
+                s.setAttribute(original.attributes[i].name, original.attributes[i].value);
+            }
+            s.textContent = original.textContent;
+            return s;
+        }
+
+        function liaEsEnlaceNavegable(a) {
+            if (!a || !a.href) return false;
+            if (a.target && a.target !== '_self') return false;
+            if (a.hasAttribute('download')) return false;
+            if (a.origin !== window.location.origin) return false;
+            var href = a.getAttribute('href') || '';
+            if (!href || href.charAt(0) === '#') return false;
+            if (/^(javascript:|mailto:|tel:)/i.test(href)) return false;
+            return true;
+        }
+
+        function liaResolverUrlsRelativas(doc, baseUrl) {
+            var pares = [['img', 'src'], ['script', 'src'], ['link', 'href'], ['a', 'href'], ['source', 'src']];
+            pares.forEach(function (par) {
+                var tag = par[0], attr = par[1];
+                Array.prototype.forEach.call(doc.querySelectorAll(tag + '[' + attr + ']'), function (el) {
+                    var raw = el.getAttribute(attr);
+                    if (!raw) return;
+                    if (/^([a-z][a-z0-9+.-]*:|#)/i.test(raw)) return; // ya es absoluta, o data:/mailto:/tel:/javascript:/#, etc.
+                    try { el.setAttribute(attr, new URL(raw, baseUrl).href); } catch (e) { /* si falla, se deja como estaba */ }
+                });
+            });
+        }
+
+        function liaNavegarSuave(url, esHistorialPopstate) {
+            var widget = document.getElementById('lia-chatbot-root-fragment');
+            var urlFinal = url;
+            fetch(url, { credentials: 'same-origin' })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('lia-nav-fail');
+                    urlFinal = res.url || url;
+                    return res.text();
+                })
+                .then(function (html) {
+                    var docNuevo = new DOMParser().parseFromString(html, 'text/html');
+                    var widgetAjeno = docNuevo.getElementById('lia-chatbot-root-fragment');
+                    if (widgetAjeno) widgetAjeno.parentNode.removeChild(widgetAjeno);
+
+                    // Actualizamos recursos de <head> propios de la nueva página
+                    // Las URLs relativas dentro del HTML recién traído deben resolverse
+                    // contra la página que acabamos de pedir, no contra la actual,
+                    // así que las normalizamos a absolutas antes de tocar nada más.
+                    liaResolverUrlsRelativas(docNuevo, urlFinal);
+
+                    // (estilos/scripts específicos de esa vista), evitando
+                    // duplicar recursos externos ya cargados.
+                    liaLimpiarHeadDinamico();
+                    if (docNuevo.head) {
+                        Array.prototype.forEach.call(docNuevo.head.children, function (el) {
+                            var tag = el.tagName;
+                            if (tag === 'TITLE' || tag === 'META') return;
+                            var refExterna = el.getAttribute('src') || el.getAttribute('href');
+                            if (refExterna && refExterna.indexOf('cdn.tailwindcss.com') !== -1) return; // se recarga aparte, al final
+                            if (refExterna) {
+                                var yaCargado = Array.prototype.some.call(document.head.children, function (existente) {
+                                    return (existente.getAttribute('src') || existente.getAttribute('href')) === refExterna;
+                                });
+                                if (yaCargado) return;
+                            }
+                            var clon = tag === 'SCRIPT' ? liaClonarScriptEjecutable(el) : el.cloneNode(true);
+                            clon.setAttribute(LIA_DYN_HEAD_ATTR, '1');
+                            document.head.appendChild(clon);
+                        });
+                    }
+
+                    if (widget && widget.parentNode) widget.parentNode.removeChild(widget);
+                    document.title = docNuevo.title || document.title;
+                    document.body.className = docNuevo.body ? docNuevo.body.className : document.body.className;
+                    while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
+                    Array.prototype.forEach.call(docNuevo.body.childNodes, function (nodo) {
+                        if (nodo.tagName === 'SCRIPT') {
+                            document.body.appendChild(liaClonarScriptEjecutable(nodo));
+                        } else {
+                            document.body.appendChild(document.importNode(nodo, true));
+                        }
+                    });
+                    if (widget) document.body.appendChild(widget);
+
+                    // Tailwind (CDN) solo genera clases de utilidad para lo que ve en el
+                    // momento en que se ejecuta su script. Como el contenido de esta
+                    // página es nuevo, forzamos que Tailwind se vuelva a ejecutar ahora
+                    // que ya está insertado, para que recalcule TODOS los estilos
+                    // (evita el problema de páginas "sin estilos" al navegar en llamada).
+                    var tailwindViejo = document.querySelector('script[src*="cdn.tailwindcss.com"]');
+                    if (tailwindViejo) {
+                        var tailwindFresco = document.createElement('script');
+                        tailwindFresco.src = tailwindViejo.src;
+                        tailwindViejo.parentNode.removeChild(tailwindViejo);
+                        document.head.appendChild(tailwindFresco);
+                    }
+
+                    if (esHistorialPopstate) history.replaceState({ liaSoft: true }, '', url);
+                    else history.pushState({ liaSoft: true }, '', url);
+                    window.scrollTo(0, 0);
+                })
+                .catch(function () {
+                    window.location.href = url;
+                });
+        }
+
+        document.addEventListener('click', function (e) {
+            if (!modoLlamada) return; // fuera de llamada, comportamiento normal intacto
+            if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            var a = e.target.closest ? e.target.closest('a') : null;
+            if (!liaEsEnlaceNavegable(a)) return;
+            e.preventDefault();
+            liaNavegarSuave(a.href, false);
+        }, true);
+
+        window.addEventListener('popstate', function () {
+            if (!modoLlamada) return;
+            liaNavegarSuave(location.href, true);
+        });
     })();
     </script>
 </div>

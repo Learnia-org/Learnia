@@ -226,5 +226,11 @@
 </div>
 
 <div th:replace="~{fragments/darkmode :: darkmode}"></div>
+<script th:inline="javascript">
+    (function () {
+        var clave = /*[[${chatUsuarioKey}]]*/ 'anon';
+        sessionStorage.removeItem('lia_call_state_v1_' + (clave || 'anon'));
+    })();
+</script>
 </body>
 </html>
