@@ -260,6 +260,134 @@ public class GeminiService {
         return new ResultadoPregunta(false, null);
     }
 
+    /**
+     * Resultado de evaluar la respuesta de un estudiante a un ejercicio o duda puntual.
+     * Permite detectar si hubo un error conceptual y explicar al estudiante por qué
+     * se equivocó, con una sugerencia concreta para corregirlo.
+     */
+    public record ResultadoEvaluacion(boolean correcta, String tipoError, String explicacion, String sugerencia) {}
+
+    public ResultadoEvaluacion evaluarRespuestaEjercicio(String enunciado, String respuestaEstudiante) {
+        String prompt = """
+                Eres un tutor de IA experto de Learnia, especializado en detectar errores
+                conceptuales de estudiantes de Matemática, Física, Inglés e Informática.
+
+                Enunciado o tema planteado: %s
+                Respuesta del estudiante: %s
+
+                Evalúa si la respuesta es conceptualmente correcta. Si el enunciado no es una
+                pregunta con respuesta verificable sino un tema abierto, evalúa si el estudiante
+                demuestra una comprensión correcta del concepto.
+
+                Responde EXACTAMENTE en este formato, con cada etiqueta en su propia línea,
+                sin nada más antes ni después, sin markdown ni LaTeX:
+                RESULTADO: CORRECTA o INCORRECTA
+                TIPO_ERROR: <nombre breve del error conceptual, o "NINGUNO" si es correcta>
+                EXPLICACION: <por qué está bien o por qué está mal, en 2 a 4 oraciones claras>
+                SUGERENCIA: <un consejo concreto y breve para reforzar o corregir el concepto>
+                """.formatted(enunciado, respuestaEstudiante);
+
+        String respuesta = generarRespuesta(prompt, null);
+        return parsearResultadoEvaluacion(respuesta);
+    }
+
+    private ResultadoEvaluacion parsearResultadoEvaluacion(String texto) {
+        Map<String, String> campos = parsearCamposEtiquetados(texto,
+                Set.of("RESULTADO", "TIPO_ERROR", "EXPLICACION", "SUGERENCIA"));
+
+        boolean correcta = campos.getOrDefault("RESULTADO", "INCORRECTA").toUpperCase().startsWith("CORRECTA");
+        String tipoError = campos.get("TIPO_ERROR");
+        if (tipoError != null && tipoError.equalsIgnoreCase("NINGUNO")) {
+            tipoError = null;
+        }
+        String explicacion = campos.getOrDefault("EXPLICACION",
+                "No fue posible generar una explicación detallada en este momento.");
+        String sugerencia = campos.getOrDefault("SUGERENCIA", "Repasa el tema y vuelve a intentarlo.");
+
+        return new ResultadoEvaluacion(correcta, tipoError, explicacion, sugerencia);
+    }
+
+    /**
+     * Resultado del análisis del perfil de aprendizaje de un estudiante:
+     * fortalezas, debilidades, estilo y ritmo de aprendizaje detectados por la IA.
+     */
+    public record ResultadoPerfil(String fortalezas, String debilidades, String estilo, String ritmo, String resumen) {}
+
+    public ResultadoPerfil generarPerfilAprendizaje(String contextoEstadisticas, String contextoErrores) {
+        String prompt = """
+                Eres el sistema de IA de Learnia encargado de construir el perfil de
+                aprendizaje de un estudiante a partir de su desempeño real en la plataforma.
+
+                Estadísticas de desempeño del estudiante:
+                %s
+
+                Errores conceptuales recientes detectados:
+                %s
+
+                A partir de estos datos, infiere el perfil de aprendizaje del estudiante.
+                Responde EXACTAMENTE en este formato, con cada etiqueta en su propia línea,
+                sin nada más antes ni después, sin markdown ni LaTeX:
+                FORTALEZAS: <temas o habilidades donde el estudiante muestra buen dominio, breve>
+                DEBILIDADES: <temas o habilidades donde el estudiante tiene dificultades, breve>
+                ESTILO: <uno de VISUAL, AUDITIVO, LECTOESCRITURA o KINESTESICO, el más probable>
+                RITMO: <uno de LENTO, MODERADO o RAPIDO>
+                RESUMEN: <2 a 3 oraciones resumiendo el momento de aprendizaje del estudiante y
+                una recomendación general para avanzar>
+                """.formatted(contextoEstadisticas, contextoErrores);
+
+        String respuesta = generarRespuesta(prompt, null);
+        Map<String, String> campos = parsearCamposEtiquetados(respuesta,
+                Set.of("FORTALEZAS", "DEBILIDADES", "ESTILO", "RITMO", "RESUMEN"));
+
+        return new ResultadoPerfil(
+                campos.getOrDefault("FORTALEZAS", "Aún no hay suficientes datos para identificar fortalezas."),
+                campos.getOrDefault("DEBILIDADES", "Aún no hay suficientes datos para identificar debilidades."),
+                campos.getOrDefault("ESTILO", "LECTOESCRITURA"),
+                campos.getOrDefault("RITMO", "MODERADO"),
+                campos.getOrDefault("RESUMEN", "Todavía estamos conociendo tu forma de aprender.")
+        );
+    }
+
+    /**
+     * Parsea una respuesta de texto plano con formato ETIQUETA: valor (una por línea),
+     * tolerando que el valor de una etiqueta continúe en las líneas siguientes hasta
+     * encontrar la próxima etiqueta conocida.
+     */
+    private Map<String, String> parsearCamposEtiquetados(String texto, Set<String> etiquetas) {
+        Map<String, String> resultado = new java.util.HashMap<>();
+        if (texto == null || texto.isBlank()) {
+            return resultado;
+        }
+
+        String etiquetaActual = null;
+        StringBuilder valorActual = new StringBuilder();
+
+        for (String linea : texto.split("\\R")) {
+            String lineaTrim = linea.trim();
+            String etiquetaEncontrada = null;
+            for (String etiqueta : etiquetas) {
+                if (lineaTrim.toUpperCase().startsWith(etiqueta + ":")) {
+                    etiquetaEncontrada = etiqueta;
+                    break;
+                }
+            }
+
+            if (etiquetaEncontrada != null) {
+                if (etiquetaActual != null) {
+                    resultado.put(etiquetaActual, valorActual.toString().trim());
+                }
+                etiquetaActual = etiquetaEncontrada;
+                valorActual = new StringBuilder(lineaTrim.substring(etiquetaEncontrada.length() + 1).trim());
+            } else if (etiquetaActual != null && !lineaTrim.isBlank()) {
+                valorActual.append(" ").append(lineaTrim);
+            }
+        }
+        if (etiquetaActual != null) {
+            resultado.put(etiquetaActual, valorActual.toString().trim());
+        }
+        return resultado;
+    }
+
     private String extraerTexto(String rawResponse) {
         JsonNode root = jsonMapper.readTree(rawResponse);
         JsonNode candidates = root.path("candidates");

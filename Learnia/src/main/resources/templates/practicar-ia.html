@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practicar con IA | Learnia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        deepBlue: '#2C3E50', terracota: '#D35400',
+                        natureGreen: '#27AE60', eduCian: '#2980B9', solarYellow: '#F1C40F'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+        #resultado { display: none; }
+    </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+    <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+    <a th:href="@{/perfil-ia}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver a mi Perfil IA</a>
+</nav>
+
+<main class="max-w-3xl mx-auto p-8 space-y-8">
+
+    <div class="bg-terracota p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+        <div class="absolute -top-10 -right-10 opacity-10">
+            <i class="fa-solid fa-wand-magic-sparkles text-[13rem] text-white rotate-12"></i>
+        </div>
+        <div class="relative z-10">
+            <h1 class="text-4xl font-black text-white leading-tight mb-3">Practicar con la IA</h1>
+            <p class="text-orange-50 font-medium max-w-2xl">
+                Planteá un tema o pregunta y respondé como creas correcto. La IA revisa tu
+                respuesta, te dice si hubo un error conceptual y te explica por qué.
+            </p>
+        </div>
+    </div>
+
+    <form id="form-practicar" class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-5">
+        <div>
+            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Materia (opcional)</label>
+            <select id="idCategoria" class="w-full mt-2 px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-deepBlue outline-none focus:ring-2 focus:ring-eduCian">
+                <option value="">Sin materia específica</option>
+                <option th:each="c : ${categorias}" th:value="${c.idCategoria}" th:text="${c.nombreCategoria}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Tema o pregunta a resolver</label>
+            <textarea id="enunciado" rows="2" required
+                      class="w-full mt-2 px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-medium text-deepBlue outline-none focus:ring-2 focus:ring-eduCian"
+                      placeholder="Ej: ¿Cuál es la derivada de x al cuadrado?"></textarea>
+        </div>
+
+        <div>
+            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Tu respuesta</label>
+            <textarea id="respuesta" rows="4" required
+                      class="w-full mt-2 px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-medium text-deepBlue outline-none focus:ring-2 focus:ring-eduCian"
+                      placeholder="Escribí tu respuesta o razonamiento..."></textarea>
+        </div>
+
+        <button type="submit" id="btn-enviar"
+                class="w-full inline-flex items-center justify-center space-x-2 bg-deepBlue text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-eduCian transition-all">
+            <span>Evaluar con IA</span><i class="fa-solid fa-paper-plane"></i>
+        </button>
+    </form>
+
+    <div id="resultado" class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-4">
+        <div class="flex items-center gap-3">
+            <span id="resultado-badge" class="text-xs font-black uppercase px-4 py-2 rounded-full"></span>
+        </div>
+        <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Explicación de la IA</p>
+            <p id="resultado-explicacion" class="text-sm text-slate-600 font-medium"></p>
+        </div>
+        <div>
+            <p class="text-[10px] font-black text-eduCian uppercase tracking-widest mb-1">Sugerencia</p>
+            <p id="resultado-sugerencia" class="text-sm text-slate-600 font-medium"></p>
+        </div>
+        <a th:href="@{/perfil-ia}" class="inline-flex items-center space-x-2 text-eduCian font-black text-xs uppercase tracking-widest hover:underline">
+            <span>Ver mi perfil actualizado</span><i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+<div th:replace="~{fragments/darkmode :: darkmode}"></div>
+
+<script th:inline="none">
+    document.getElementById('form-practicar').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var btn = document.getElementById('btn-enviar');
+        var idCategoria = document.getElementById('idCategoria').value;
+        var enunciado = document.getElementById('enunciado').value.trim();
+        var respuesta = document.getElementById('respuesta').value.trim();
+
+        if (!enunciado || !respuesta) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span>Analizando...</span>';
+
+        fetch('/api/ia/evaluar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                idCategoria: idCategoria ? parseInt(idCategoria, 10) : null,
+                enunciado: enunciado,
+                respuesta: respuesta
+            })
+        })
+            .then(function (res) {
+                if (!res.ok) throw new Error('Error al evaluar');
+                return res.json();
+            })
+            .then(function (data) {
+                var badge = document.getElementById('resultado-badge');
+                if (data.correcta) {
+                    badge.textContent = '¡Respuesta correcta!';
+                    badge.className = 'text-xs font-black uppercase px-4 py-2 rounded-full bg-natureGreen/10 text-natureGreen';
+                } else {
+                    badge.textContent = 'Error conceptual detectado' + (data.tipoError ? ': ' + data.tipoError : '');
+                    badge.className = 'text-xs font-black uppercase px-4 py-2 rounded-full bg-terracota/10 text-terracota';
+                }
+                document.getElementById('resultado-explicacion').textContent = data.explicacion || '';
+                document.getElementById('resultado-sugerencia').textContent = data.sugerencia || '';
+                document.getElementById('resultado').style.display = 'block';
+                document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(function () {
+                alert('Ocurrió un error al evaluar tu respuesta. Intenta de nuevo.');
+            })
+            .finally(function () {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Evaluar con IA</span><i class="fa-solid fa-paper-plane"></i>';
+            });
+    });
+</script>
+</body>
+</html>

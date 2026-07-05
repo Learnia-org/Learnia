@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil IA | Learnia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        deepBlue: '#2C3E50', terracota: '#D35400',
+                        natureGreen: '#27AE60', eduCian: '#2980B9', solarYellow: '#F1C40F'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #fcfdfd; background-image: radial-gradient(#2980B910 1px, transparent 1px); background-size: 30px 30px; }
+        .prioridad-ALTA { background: rgba(211,84,0,0.1); color: #D35400; }
+        .prioridad-MEDIA { background: rgba(241,196,15,0.15); color: #b7860b; }
+        .prioridad-BAJA { background: rgba(39,174,96,0.1); color: #27AE60; }
+    </style>
+</head>
+<body class="font-sans text-deepBlue antialiased">
+
+<nav class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
+    <div class="text-3xl font-black">LEAR<span class="text-eduCian">NIA</span></div>
+    <a th:href="@{/menu}" class="text-sm font-bold text-slate-500 hover:text-eduCian transition-colors">Volver al Inicio</a>
+</nav>
+
+<main class="max-w-6xl mx-auto p-8 space-y-8">
+
+    <div class="bg-eduCian p-10 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+        <div class="absolute -top-10 -right-10 opacity-10">
+            <i class="fa-solid fa-brain text-[13rem] text-white rotate-12"></i>
+        </div>
+        <div class="relative z-10">
+            <h1 class="text-4xl font-black text-white leading-tight mb-3">Tu Perfil de Aprendizaje</h1>
+            <p class="text-blue-50 font-medium max-w-2xl">
+                La IA de Learnia analiza tu progreso, tus errores y tus ejercicios para entender
+                cómo aprendés mejor y sugerirte qué estudiar a continuación.
+            </p>
+            <a th:href="@{/perfil-ia/practicar}"
+               class="inline-flex items-center space-x-2 bg-white text-eduCian mt-6 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all">
+                <span>Practicar con la IA</span><i class="fa-solid fa-wand-magic-sparkles"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Estilo de aprendizaje</p>
+            <p class="text-2xl font-black text-deepBlue" th:text="${panel.perfil.estiloAprendizaje != null ? panel.perfil.estiloAprendizaje : 'Aún sin definir'}">Visual</p>
+        </div>
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ritmo de aprendizaje</p>
+            <p class="text-2xl font-black text-deepBlue" th:text="${panel.perfil.ritmoAprendizaje != null ? panel.perfil.ritmoAprendizaje : 'Aún sin definir'}">Moderado</p>
+        </div>
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Confianza del perfil</p>
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden mt-2">
+                <div class="h-3 rounded-full bg-eduCian transition-all" th:style="'width:' + ${panel.perfil.nivelConfianza} + '%'"></div>
+            </div>
+            <p class="text-xs text-slate-400 font-bold mt-2" th:text="${panel.perfil.nivelConfianza} + '% (según tu actividad)'">0%</p>
+        </div>
+    </div>
+
+    <div th:if="${panel.perfil.resumenIA != null}" class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+        <p class="text-[10px] font-black text-eduCian uppercase tracking-widest mb-2">Lectura de la IA</p>
+        <p class="text-slate-600 font-medium" th:text="${panel.perfil.resumenIA}">Resumen generado por IA.</p>
+    </div>
+    <div th:if="${panel.perfil.resumenIA == null}" class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm text-center">
+        <p class="text-slate-400 font-bold">Todavía no hay suficiente actividad para generar tu perfil. ¡Practicá algunos ejercicios con la IA!</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-3">
+            <h3 class="text-lg font-black text-natureGreen flex items-center gap-2"><i class="fa-solid fa-star"></i>Fortalezas</h3>
+            <p class="text-sm text-slate-600 font-medium" th:text="${panel.perfil.fortalezas != null ? panel.perfil.fortalezas : 'Aún no identificadas.'}">-</p>
+        </div>
+        <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-3">
+            <h3 class="text-lg font-black text-terracota flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i>Debilidades</h3>
+            <p class="text-sm text-slate-600 font-medium" th:text="${panel.perfil.debilidades != null ? panel.perfil.debilidades : 'Aún no identificadas.'}">-</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+        <h2 class="text-2xl font-black text-deepBlue mb-1">Ruta de Aprendizaje Adaptativa</h2>
+        <p class="text-sm text-slate-500 font-medium mb-6">Ordenada según tu rendimiento real: primero lo que más necesitás reforzar.</p>
+
+        <div th:if="${#lists.isEmpty(panel.rutaAdaptativa.recomendaciones)}" class="text-center py-8">
+            <p class="text-slate-400 font-bold">Todavía no hay materias activas para recomendar.</p>
+        </div>
+
+        <div class="space-y-4">
+            <div th:each="rec : ${panel.rutaAdaptativa.recomendaciones}"
+                 class="border border-slate-100 rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="text-sm font-black text-deepBlue" th:text="${rec.nombreCategoria}">Materia</span>
+                        <span class="text-[10px] font-black uppercase px-3 py-1 rounded-full"
+                              th:classappend="'prioridad-' + ${rec.prioridad}"
+                              th:text="${rec.prioridad}">ALTA</span>
+                    </div>
+                    <p class="text-sm text-slate-500 font-medium" th:text="${rec.motivo}">Motivo</p>
+                    <p th:if="${rec.tituloRecursoSugerido != null}" class="text-xs text-eduCian font-bold mt-1">
+                        <i class="fa-solid fa-lightbulb mr-1"></i>Siguiente: <span th:text="${rec.tituloRecursoSugerido}">Recurso</span>
+                    </p>
+                </div>
+                <a th:href="@{/ruta-aprendizaje/{id}(id=${rec.idCategoria})}"
+                   class="inline-flex items-center justify-center space-x-2 bg-deepBlue text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-eduCian transition-all">
+                    <span>Ver materia</span><i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+        <h2 class="text-2xl font-black text-deepBlue mb-1">Errores Conceptuales Recientes</h2>
+        <p class="text-sm text-slate-500 font-medium mb-6">Así explica la IA por qué te equivocaste, para que no vuelva a pasar.</p>
+
+        <div th:if="${#lists.isEmpty(panel.erroresRecientes)}" class="text-center py-8">
+            <p class="text-slate-400 font-bold">Todavía no se detectaron errores conceptuales. ¡Seguí así!</p>
+        </div>
+
+        <div class="space-y-4">
+            <div th:each="err : ${panel.erroresRecientes}" class="border border-slate-100 rounded-2xl p-5"
+                 th:classappend="${err.resuelto} ? 'opacity-60' : ''">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-black text-slate-400 uppercase tracking-widest" th:text="${err.categoriaNombre}">Materia</span>
+                    <span th:if="${err.resuelto}" class="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-natureGreen/10 text-natureGreen">Resuelto</span>
+                    <span th:unless="${err.resuelto}" class="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-terracota/10 text-terracota">Pendiente</span>
+                </div>
+                <p class="text-sm font-black text-deepBlue mb-1" th:text="${err.tema}">Tema del error</p>
+                <p class="text-sm text-slate-600 font-medium" th:text="${err.explicacionIA}">Explicación de la IA.</p>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+<div th:replace="~{fragments/darkmode :: darkmode}"></div>
+</body>
+</html>

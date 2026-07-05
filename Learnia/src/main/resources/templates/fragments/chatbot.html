@@ -623,7 +623,30 @@
                 });
         }
 
-        renderAll();
+        function inicializar() {
+            var historiaLocal = getHistory();
+            var esUsuarioAutenticado = window.LIA_USER_KEY && window.LIA_USER_KEY !== 'anon';
+
+            if (historiaLocal.length > 0 || !esUsuarioAutenticado) {
+                renderAll();
+                return;
+            }
+
+            // Memoria del estudiante: si no hay historial en este navegador pero el
+            // usuario está autenticado, se recupera la conversación guardada en el
+            // servidor para que la IA "recuerde" el progreso entre sesiones o dispositivos.
+            fetch('/api/chatbot/historial')
+                .then(function (res) { return res.ok ? res.json() : []; })
+                .then(function (historialServidor) {
+                    if (Array.isArray(historialServidor) && historialServidor.length > 0) {
+                        saveHistory(historialServidor);
+                    }
+                    renderAll();
+                })
+                .catch(function () { renderAll(); });
+        }
+
+        inicializar();
         if (sessionStorage.getItem(OPEN_KEY) === '1') {
             openPanel();
         }
